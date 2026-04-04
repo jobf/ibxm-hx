@@ -1,93 +1,146 @@
-# haxe bindings for micromod
+# haxe bindings for ibxm
 
-[micromod](https://github.com/martincameron/micromod) is
+[ibxm](https://github.com/martincameron/micromod) is
 
-> A good-quality player library for the ProTracker MOD music format
-for JavaScript (HTML5 Web Audio), Java, ANSI C (SDL) and Pascal (SDL).
-
-Many of the original targets are supported by haxe.
-
-C and JavaScript alone means lime could use it for background music, for example. I probably won't implement Java, however there is an interesting tool there which generates mods from text files...
+> A player library for the ProTracker MOD, Scream Tracker 3 S3M, and FastTracker 2 XM music formats for Javascript (HTML5 Web Audio), Java and ANSI C.
 
 # status
 
-It's work in progress, but currently there are bindings for hashlink and javascript with enough functionality to read the mod file, extract instrument names, and render audio samples.
+So far I've only tested on linux but the bindings for hashlink, JavaScript, and hxcpp are working.
 
-There is also a gui app in the repo for playing back modules in real time.
+The bindings enable
 
-# test
+ - read module meta data, e.g. instrument/sample names
+ - generate audio from the module sequence
+
+# Testing it
 
 Clone the source
 
 ```
-git clone --recursive https://github.com/jobf/micromodhx
+git clone --recursive https://github.com/jobf/ibxm-hx
 ```
 
-## test the bindings (render audio to disk)
 
-There are 2 minimal test apps that are meant for asserting that the bindings work on hashlink and JavaScript.
 
-For a complete gui application see the [lime app section](#lime-app-render-audio-to-sound-card).
+## test-pure (render audio to wav file, pure haxe build)
+
+Minimal example of generating the audio and writing it to disk as a wav file.
+
+### Install dependencies
+
+```
+# format (read and write various file formats including wav)
+haxelib install format
+
+# ibxm-hx (this haxelib)
+haxelib git ibxm-hx https://github.com/jobf/ibxm-hx
+
+```
 
 ### hashlink
 
-Currently supports linux with hashlink installed globally.
-
-Run the following. This will compile the hdll and the test hashlink program to `bin/hl` which will then be run by the system-installed hashlink. You'll get some information about the test module on the command line and the module will be rendered to a wav `bin/hl/test.wav`.
+Build it
 
 ```
-haxe test-hl.hxml
+haxe build-hl.hxml
 ```
+
+Run it (assumes hashlink is available on PATH)
+
+```
+cd bin/hl
+hl main.hl ../../assets/yesod.xm
+```
+
+output.wav will have been written to the folder
+
+### cpp
+
+Build it
+
+```
+haxe build-cpp.hxml
+```
+
+Run it
+
+```
+cd bin/cpp
+./Main ../../assets/yesod.xm
+```
+
+output.wav will have been written to the folder
 
 ### js
 
-Currently suports linux with python intalled globally.
-
-Run the following. This will compile the js and the test js program to `bin/js` along with dependencies. The files will then be server over http using python, open http://localhost:8123 and check the console. This aims to mirror the same behavior as the hashlink Main app, although the playback routine is not finished. To test audio playback browse to http://localhost:8123/test.html where there is a haxe port of the original javascript test page allowing you to load a module using file browser and play the audio.
+Build it
 
 ```
-haxe test-js.hxml
+haxe build-js.hxml
 ```
 
-## lime app (render audio to sound card)
+Open assets/index.html in a web browser.
 
-This is a gui application for playing modules and sits on top of lime, so you need that installed, along with some other haxelibs...
+Click Browse... and choose the assets/yesod.xm file
+
+Click Render to wav and the output.wav will be downloaded
+
+
+
+
+## test-lime (render audio to sound card, build depends on https://lime.openfl.org/)
+
+Minimal example of playing the module back via sound card.
+
+### Install dependencies
 
 ```
-# lime
+# lime (general appliation layer for graphics and audio back end)
 haxelib install lime
 
-# peote-view
+# peote-view (open gl render lib)
 haxelib install peote-view
+
+# ibxm-hx (this haxelib)
+haxelib git ibxm-hx https://github.com/jobf/ibxm-hx
 ```
+
+### Run it
+
 You want to be in the correct path
 
 ```
 cd test-lime
 ```
 
-Then you can run either with hashlink or in a web browser.
-
-Download some modules from e.g. https://modarchive.org/ or use your own.  Currently micromod appears to only support mod, the s3m and xm claim is apparently false.
+Then you can run either with hashlink, web browser, or native.
 
 ```
-# hashlink
+# hashlink jit
 lime test hl
 
-# browser
+# web browser
 lime test html5
+
+# linux
+lime test linux
+
+# windows (as yet untested)
+lime test windows
+
+# hashlink c also works, at least on linux
+lime test hlc
 ```
 
-### glitches
-
-The modules that are included in the micromod repository are glitchy. I had issues loading them into protracker and they cause the hashlink build of to segfault.
-
-Modules from modarchive seem to be fine however.
 
 # to do
 
-- windows scripts (currently scripts used during compilation only support linux/mac?)
-- make the hashlink test-lime more robust
-- hxcpp bindings :(
-- unify the API further
-- code cleaning
+- unit tests ?
+- float32 for ibxm-ac
+- comment pure tests
+- document build macro
+- test on windows
+- republish full player app in a separate repo
+- make locateIbxmHaxelibPath more resilient (add additional check for haxelib version?)
+- clean out unused code

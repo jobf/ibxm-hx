@@ -1,0 +1,3 @@
+<project>
+	<dependency path="external/micromod/ibxm-js/IBXM.js" embed="true" if="html5"/>
+</project>

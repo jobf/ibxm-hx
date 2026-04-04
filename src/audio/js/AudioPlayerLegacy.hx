@@ -4,14 +4,15 @@ package audio.js;
 import js.html.audio.AudioContext;
 import js.html.audio.AudioProcessingEvent;
 import js.html.audio.ScriptProcessorNode;
-import micromod.bindings.js.MicromodJs.Micromod;
 #end
+
+import audio.IReplaySource;
 
 @:publicFields
 class AudioPlayerLegacy implements IAudioPlayer {
 	var audioContext:AudioContext;
 	var scriptProcessor:ScriptProcessorNode;
-	var micromod:Micromod;
+	var replay:IReplaySource;
 	var onaudioprocess:AudioProcessingEvent->Void;
 	
 	var bufferSize:Int = 0;
@@ -23,13 +24,13 @@ class AudioPlayerLegacy implements IAudioPlayer {
 		scriptProcessor = audioContext.createScriptProcessor(0, 0, 2);
 	}
 
-	public function setAudioSource(source:IMicromodSource) {
+	public function setAudioSource(replay:IReplaySource) {
 		onaudioprocess = (event:AudioProcessingEvent) -> {
 			if (isPlaying) {
 				samplesProcessed += event.outputBuffer.length;
 				var leftBuf:haxe.io.Float32Array = cast event.outputBuffer.getChannelData(0);
 				var rightBuf:haxe.io.Float32Array = cast event.outputBuffer.getChannelData(1);
-				source.getAudio(leftBuf, rightBuf, event.outputBuffer.length);
+				replay.getAudio(leftBuf, rightBuf, event.outputBuffer.length);
 			} else {
 				// Fill with silence when stopped
 				var leftBuf:haxe.io.Float32Array = cast event.outputBuffer.getChannelData(0);

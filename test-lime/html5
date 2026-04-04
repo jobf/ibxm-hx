@@ -1,2 +1,0 @@
-cp ../external/micromod/micromod-js/*.js bin/html5/bin
-cp index/* bin/html5/bin

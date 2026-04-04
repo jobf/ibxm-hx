@@ -9,5 +9,5 @@ interface IAudioPlayer {
 	function stop():Void;
 	function pause():Void;
 	function resume():Void;
-	function setAudioSource(source:IMicromodSource):Void;
+	function setAudioSource(source:IReplaySource):Void;
 }

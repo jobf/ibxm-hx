@@ -19,5 +19,5 @@ extern class AudioWorkletContext extends AudioContext {
 extern class AudioWorkletNode extends AudioNode {
 	function new(context:AudioContext, name:String, options:AudioWorkletNodeOptions):Void;
 	var port:MessagePort;
-	function addModule(url:String):Void;
+	function addModule(url:String):js.lib.Promise<Void>;
 }

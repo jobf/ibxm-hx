@@ -1,18 +1,19 @@
 package audio.js;
 
+import js.lib.Int8Array;
+import haxe.io.Bytes;
 import haxe.io.Float32Array;
-import audio.IMicromodSource;
+import audio.IReplaySource;
 import audio.IAudioPlayer;
 
-#if js
 import audio.js.AudioWorkletContext;
 import js.html.Blob;
 import js.html.URL;
-#end
+import ibxm.bindings.js.IbxmJs as Replay;
 
 @:publicFields
 class AudioPlayer implements IAudioPlayer {
-	var micromod:IMicromodSource;
+	var replay:IReplaySource;
 	
 	var audioContext:AudioWorkletContext;
 	var node:AudioWorkletNode;
@@ -20,16 +21,16 @@ class AudioPlayer implements IAudioPlayer {
 	var bufferSize:Int = 1024;
 	var totalSamples:Int = 0;
 	var samplesProcessed:Int = 0;
-	var phase:Float = 0;
 	var isInitialized:Bool = false;
 	var isPlaying:Bool = false;
+	var moduleReady:js.lib.Promise<Void>;
 
 	function new():Void {
 		audioContext = new AudioWorkletContext();
 
 		var blob = new Blob([Processor.code], {type: "application/javascript"});
 		var url = URL.createObjectURL(blob);
-		audioContext.audioWorklet.addModule(url);
+		moduleReady = audioContext.audioWorklet.addModule(url);
 	}
 
 	function initAudioWorkletNode() {
@@ -72,7 +73,7 @@ class AudioPlayer implements IAudioPlayer {
 		samplesProcessed += bufferSize;
 		var buffL = new Float32Array(bufferSize);
 		var buffR = new Float32Array(bufferSize);
-		micromod.getAudio(buffL, buffR, bufferSize);
+		replay.getAudio(buffL, buffR, bufferSize);
 		streamAudioData(buffL, buffR);
 		if(samplesProcessed >= totalSamples)
 		{
@@ -154,9 +155,16 @@ class AudioPlayer implements IAudioPlayer {
 		trace('Audio playback resumed');
 	}
 
-	function setAudioSource(micromod:IMicromodSource):Void {
-		this.micromod = micromod;
-		totalSamples = micromod.calculateSongDuration();
+	function playModule(moduleBytes:Bytes):Void {
+		var intArray = new Int8Array(moduleBytes.getData());
+		Replay.initialise(intArray, Std.int(getSamplingRate()));
+		setAudioSource(Replay.get_source()); // IbxmJs binding, snake_case intentional
+		moduleReady.then(_ -> play());
+	}
+
+	function setAudioSource(replay:IReplaySource):Void {
+		this.replay = replay;
+		totalSamples = replay.calculateSongDuration();
 		isInitialized = true;
 	}
 

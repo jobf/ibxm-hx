@@ -1,49 +1,45 @@
 package audio.lime;
 
-import micromod.bindings.hl.MicromodHl;
-import lime.utils.UInt8Array;
 import lime.media.openal.ALC;
 import lime.media.openal.AL;
 import lime.media.openal.ALBuffer;
 import lime.media.openal.ALSource;
-import haxe.io.Float32Array;
 import lime.utils.Int16Array;
 import haxe.io.Bytes;
 import haxe.Timer;
+import ibxm.Replay;
 
 @:publicFields
 class AudioPlayer implements IAudioPlayer {
-	var micromod:IMicromodSource;
-	var buffer:ALBuffer;
+	var replay:IReplaySource;
 	var buffers:Array<ALBuffer>;
 	var source:ALSource;
 	var timer:haxe.Timer;
-	var blockCount:Int = 2;
 	var buffersProcessed:Int = 0;
 
-	var sampleRate:Float;
+	var sampleRate:Int;
 	var numChannels = 2;
 
 	var bufferSize:Int;
 	var bufferCount:Int;
 	var totalSamples:Int = 0;
 	var samplesProcessed:Int = 0;
-	var phase:Float = 0;
 	var isInitialized:Bool = false;
 	var isPlaying:Bool = false;
-	var interleaved:Bytes;
 	var sampleBuffer:Bytes;
 	
-	public function new(sampleRate:Float = 48000) {
+	public function new(sampleRate:Int = 48000) {
+		this.sampleRate = sampleRate;
+	}
+
+	function init():Void {
 		bufferCount = 2;
 		buffers = AL.genBuffers(bufferCount);
-
 		// source will play the buffered audio
 		source = AL.createSource();
-
-		this.sampleRate = sampleRate;
-		var bufferSampleCount = 4096;
+		var bufferSampleCount = 2048;
 		bufferSize = bufferSampleCount * numChannels * 2;
+		// trace('bufferSampleCount $bufferSampleCount bufferSize $bufferSize');
 		sampleBuffer = Bytes.alloc(bufferSize);
 		sampleBuffer.fill(0, bufferSize, 0);
 
@@ -53,7 +49,7 @@ class AudioPlayer implements IAudioPlayer {
 		// trace('time $time');
 
 		for (buffer in buffers) {
-			AL.bufferData(buffer, AL.FORMAT_STEREO16, Int16Array.fromBytes(sampleBuffer), bufferSize, Std.int(sampleRate));
+			AL.bufferData(buffer, AL.FORMAT_STEREO16, Int16Array.fromBytes(sampleBuffer), bufferSize, sampleRate);
 			AL.sourceQueueBuffer(source, buffer);
 			sampleBuffer.fill(0, bufferSize, 0);
 		}
@@ -66,17 +62,16 @@ class AudioPlayer implements IAudioPlayer {
 				// iterate the buffers that need to be refilled
 				var finished_buffers = AL.sourceUnqueueBuffers(source, num_buffers_finished);
 				for (buffer in finished_buffers) {
-					if(isInitialized){
-						MicromodHl.get_audio(sampleBuffer, bufferSampleCount);
+					if (isInitialized) {
+						replay.getAudio(sampleBuffer, bufferSize);
 					}
-					AL.bufferData(buffer, AL.FORMAT_STEREO16, Int16Array.fromBytes(sampleBuffer), bufferSize, Std.int(sampleRate));
+					AL.bufferData(buffer, AL.FORMAT_STEREO16, Int16Array.fromBytes(sampleBuffer), bufferSize, sampleRate);
 					AL.sourceQueueBuffer(source, buffer);
-					sampleBuffer.fill(0, bufferSize, 0);
+					// sampleBuffer.fill(0, bufferSize, 0);
 					samplesProcessed += bufferSampleCount;
 				}
 			}
 		}
-
 	}
 
 	public function getSamplingRate():Float {
@@ -87,9 +82,11 @@ class AudioPlayer implements IAudioPlayer {
 		return samplesProcessed;
 	}
 
-	public function setAudioSource(source:IMicromodSource) {
-		micromod = source;
-		totalSamples = micromod.calculateSongDuration();
+	public function setAudioSource(replay:IReplaySource) {
+		this.replay = replay;
+		totalSamples = replay.calculateSongDuration();
+		// trace('totalSamples $totalSamples');
+		init();
 		isInitialized = true;
 	}
 
@@ -102,6 +99,13 @@ class AudioPlayer implements IAudioPlayer {
 	// }
 
 	public function play() {
+		AL.sourcePlay(source);
+		isPlaying = true;
+	}
+
+	public function playModule(moduleBytes:Bytes) {
+		Replay.initialise(moduleBytes, sampleRate);
+		setAudioSource(Replay.getSource());
 		AL.sourcePlay(source);
 		isPlaying = true;
 	}

@@ -1,0 +1,5 @@
+--class-path src
+-lib ibxm-hx
+-lib format
+-main MainJs
+-js bin/js/main.js

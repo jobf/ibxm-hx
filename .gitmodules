@@ -1,3 +1,6 @@
 [submodule "external/micromod"]
 	path = external/micromod
 	url = https://github.com/jobf/micromod.git
+[submodule "external/hashlink"]
+	path = external/hashlink
+	url = https://github.com/HaxeFoundation/hashlink.git

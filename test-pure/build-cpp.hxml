@@ -1,0 +1,5 @@
+--class-path src
+-lib ibxm-hx
+-lib format
+-main Main
+-cpp bin/cpp

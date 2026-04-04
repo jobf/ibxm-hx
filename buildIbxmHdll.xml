@@ -1,0 +1,66 @@
+<xml>
+
+
+<pragma once="true" />
+
+	<set name="ROOT" value="${this_dir}" />
+	<set name="MICROMODC" value="external/micromod/micromod-c" />
+	<set name="IBXMC" value="external/micromod/ibxm-ac" />
+	
+	<set name="HL_INCLUDE" value="${ROOT}/external/hashlink/src" />
+
+	<files id="micromodHl">
+		<compilerflag value="-I${HL_INCLUDE}" />
+		<compilerflag value="-I${ROOT}/${MICROMODC}" />
+
+		<compilerflag value="-std=c11" unless="windows" />
+		<compilerflag value="-DLIBHL_EXPORTS" />
+		<compilerflag value="-DHAVE_CONFIG_H" />
+		<compilerflag value="-DPCRE2_CODE_UNIT_WIDTH=16" />
+
+		<file name="${ROOT}/${MICROMODC}/micromod.c" />
+		<file name="${ROOT}/glue/micromodHl.c" />
+	</files>
+
+	<files id="ibxmHl">
+		<compilerflag value="-I${HL_INCLUDE}" />
+		<compilerflag value="-I${ROOT}/${IBXMC}" />
+
+		<compilerflag value="-std=c11" unless="windows" />
+		<compilerflag value="-DLIBHL_EXPORTS" />
+		<compilerflag value="-DHAVE_CONFIG_H" />
+		<compilerflag value="-DPCRE2_CODE_UNIT_WIDTH=16" />
+
+		<file name="${ROOT}/${IBXMC}/ibxm.c" />
+		<file name="${ROOT}/glue/ibxmHl.c" />
+	</files>
+
+	<target id="default" output="micromodHl" toolid="dll" tool="linker">
+		<files id="micromodHl" />
+		<lib name="-lhl" unless="windows" />
+		<lib name="-pthread" if="linux" />
+
+		<ext value=".hdll" />
+		<outdir name="${ROOT}/glue/bin" />
+	</target>
+
+	<target id="hl" output="ibxmHl" toolid="dll" tool="linker">
+		<files id="ibxmHl" />
+		<lib name="-lhl" unless="windows" />
+		<lib name="-pthread" if="linux" />
+
+		<ext value=".hdll" />
+		<outdir name="${ROOT}/glue/bin" />
+	</target>
+
+
+	<target id="hlc" output="ibxmHl" toolid="dll" tool="linker">
+		<files id="ibxmHl" />
+		<lib name="-lhl" unless="windows" />
+		<lib name="-pthread" if="linux" />
+
+		<ext value=".so" />
+		<outdir name="${ROOT}/glue/bin" />
+	</target>
+
+</xml>

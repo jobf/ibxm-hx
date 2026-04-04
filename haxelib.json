@@ -1,14 +1,16 @@
 {
-	"name": "micromodhx",
-	"url": "https://https://github.com/jobf/micromodhx",
+	"name": "ibxm-hx",
+	"url": "https://https://github.com/jobf/ibxm-hx",
 	"license": "MIT",
 	"tags": [
 		"audio",
 		"mod",
-		"protracker"
+		"protracker",
+		"xm",
+		"s3m"
 	],
-	"description": "Bindings for protracker mod playback.",
-	"version": "0.2.0",
+	"description": "Bindings for ibxm mod playback.",
+	"version": "0.3.0",
 	"classPath": "src/",
 	"releasenote": "Unreleased.",
 	"contributors": [

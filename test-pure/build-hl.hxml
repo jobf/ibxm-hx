@@ -1,0 +1,6 @@
+--class-path src
+-lib ibxm-hx
+-lib format
+-main Main
+-hl bin/hl/main.hl
+
