@@ -26,7 +26,7 @@ class Instrument {
 	/** Vibrato rate (XM only). 0–63, higher = faster oscillation. **/
 	var vibRate:Int;
 
-	function new(name, numSamples, volFadeout, vibType, vibSweep, vibDepth, vibRate) {
+	function new(name:String, numSamples:Int, volFadeout:Int, vibType:Int, vibSweep:Int, vibDepth:Int, vibRate:Int) {
 		this.name = name;
 		this.numSamples = numSamples;
 		this.volFadeout = volFadeout;

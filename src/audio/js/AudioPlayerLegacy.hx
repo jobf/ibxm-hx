@@ -1,30 +1,35 @@
 package audio.js;
 
-#if js
 import js.html.audio.AudioContext;
 import js.html.audio.AudioProcessingEvent;
 import js.html.audio.ScriptProcessorNode;
-#end
-
+import js.lib.Int8Array;
+import haxe.io.Bytes;
 import audio.IReplaySource;
+import ibxm.bindings.js.IbxmJs as Replay;
 
+/*
+	This IAudioPlayer implementation can be used when https is not available.
+*/
 @:publicFields
 class AudioPlayerLegacy implements IAudioPlayer {
-	var audioContext:AudioContext;
-	var scriptProcessor:ScriptProcessorNode;
-	var replay:IReplaySource;
-	var onaudioprocess:AudioProcessingEvent->Void;
+	private var audioContext:AudioContext;
+	private var scriptProcessor:ScriptProcessorNode;
+	private var replay:IReplaySource;
+	private var onaudioprocess:AudioProcessingEvent->Void;
 	
-	var bufferSize:Int = 0;
-	public var isPlaying:Bool = false;
-	public var samplesProcessed:Int = 0;
+	private var bufferSize:Int = 0;
+
+	var isPlaying:Bool = false;
+	var samplesProcessed:Int = 0;
 
 	function new():Void {
 		audioContext = new AudioContext();
 		scriptProcessor = audioContext.createScriptProcessor(0, 0, 2);
+		trace('info: using legacy web player');
 	}
 
-	public function setAudioSource(replay:IReplaySource) {
+	function setAudioSource(replay:IReplaySource) {
 		onaudioprocess = (event:AudioProcessingEvent) -> {
 			if (isPlaying) {
 				samplesProcessed += event.outputBuffer.length;
@@ -54,6 +59,13 @@ class AudioPlayerLegacy implements IAudioPlayer {
 		scriptProcessor.connect(audioContext.destination);
 	}
 
+	function playModule(moduleBytes:Bytes):Void {
+		var intArray = new Int8Array(moduleBytes.getData());
+		Replay.initialise(intArray, Std.int(getSamplingRate()));
+		setAudioSource(Replay.getSource());
+		play();
+	}
+
 	function stop():Void {
 		isPlaying = false;
 		if (scriptProcessor.onaudioprocess != null) {
@@ -62,11 +74,11 @@ class AudioPlayerLegacy implements IAudioPlayer {
 		}
 	}
 
-	public function pause() {
+	function pause() {
 		isPlaying = false;
 	}
 
-	public function resume() {
+	function resume() {
 		isPlaying = true;
 	}
 

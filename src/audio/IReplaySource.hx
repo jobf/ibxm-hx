@@ -3,12 +3,15 @@ package audio;
 import haxe.io.Float32Array;
 
 interface IReplaySource {
-	function calculateSongDuration():Int;
-	function calculateMixBufferLen(sampleRate:Int):Int;
+	function calculateSequenceLength():Int;
+	function calculateMixBufferLength(sampleRate:Int):Int;
 	function getAudio(left:Float32Array, right:Float32Array, numSamples:Int):Void;
 	function getAudioInterleaved(output:Float32Array, numSamples:Int):Void;
 }
 
+/**
+ * For testing with generated sine wave.
+ */
 class SineSource implements IReplaySource {
 	var sampleRate:Float;
 	var leftFreq:Float = 440;
@@ -22,11 +25,11 @@ class SineSource implements IReplaySource {
 		sampleRate = samplingRate;
 	}
 
-	public function calculateSongDuration():Int {
+	public function calculateSequenceLength():Int {
 		return Std.int(sampleRate * 5);
 	}
 
-	public function calculateMixBufferLen(sr:Int):Int {
+	public function calculateMixBufferLength(sr:Int):Int {
 		return 4096;
 	}
 

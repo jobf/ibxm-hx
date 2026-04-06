@@ -27,7 +27,7 @@ class Sample {
 	/** Fine-tune value in 1/128 semitone units (XM only). **/
 	var fineTune:Int;
 
-	function new(name, loopStart, loopLength, volume, panning, relNote, fineTune) {
+	function new(name:String, loopStart:Int, loopLength:Int, volume:Int, panning:Int, relNote:Int, fineTune:Int) {
 		this.name = name;
 		this.loopStart = loopStart;
 		this.loopLength = loopLength;

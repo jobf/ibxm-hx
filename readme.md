@@ -142,7 +142,10 @@ See https://github.com/jobf/ibxm-hx-test
 
 - test on windows
 - make locateIbxmHaxelibPath more resilient (add additional check for haxelib version?)
-- comment pure tests
 - document build macro
-- clean out unused code
+- more comments
+- unify ModuleData api ?
 - unit tests ?
+- expose control over looping
+- port reverb to haxe
+- extract web audio streaming api so it can be used in other places

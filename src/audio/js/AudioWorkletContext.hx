@@ -12,7 +12,7 @@ import js.html.MessagePort;
 @:native("AudioContext")
 extern class AudioWorkletContext extends AudioContext {
 	function new( ?contextOptions : AudioContextOptions ) : Void;
-	public var audioWorklet:AudioWorkletNode;
+	var audioWorklet:AudioWorkletNode;
 }
 
 @:native("AudioWorkletNode")

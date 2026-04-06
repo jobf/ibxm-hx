@@ -26,7 +26,7 @@ class AuthorWav implements IAudioPlayer {
 
 	var source:IReplaySource;
 
-	public function setAudioSource(s:IReplaySource)
+	public function setAudioSource(s:IReplaySource):Void
 		source = s;
 
 	public function getSamplingRate():Float
@@ -45,7 +45,7 @@ class AuthorWav implements IAudioPlayer {
 		isPlaying = true;
 		samplesProcessed = 0;
 
-		var totalSamples = source.calculateSongDuration();
+		var totalSamples = source.calculateSequenceLength();
 
 		final channels = 2;
 		final bytesPerFrame = channels * 4;

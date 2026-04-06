@@ -7,9 +7,19 @@ class Main extends Application {
 		
 		// web browser cannot start audio until a gesture has been made so bind to mouse event
 		var isPlaying:Bool = false;
+		var isAudioWorklet = true;
 		window.onMouseDown.add((x, y, button) -> {
 			if (!isPlaying) {
-				Load.bytes("assets/yesod.xm", data -> new audio.js.AudioPlayer().playModule(data));
+				
+				if(isAudioWorklet){
+					// use AudioWorklet for streaming audio data, requires https when not running locally
+					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioPlayer().playModule(data));
+				}
+				else{
+					// use AudioProcessingEvent for streaming audio data, does not require https at all
+					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioPlayerLegacy().playModule(data));
+				}
+
 				isPlaying = true;
 			}
 		});

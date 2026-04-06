@@ -82,28 +82,28 @@ private extern class C {
 
 @:publicFields
 class IbxmCpp {
-	static function get_version():String {
+	static function getVersion():String {
 		return C.get_version();
 	}
 
-	static function initialise(module:haxe.io.Bytes, sampleRate:Int):Int {
+	static function initialise(module:haxe.io.Bytes, sampleRate:Int, interpolation:Bool):Int {
 		var ptr = cpp.NativeArray.address(module.getData(), 0);
-		return C.initialise(ptr, module.length, sampleRate, 1);
+		return C.initialise(ptr, module.length, sampleRate, interpolation ? 1 : 0);
 	}
 
-	static function get_name():String {
+	static function getName():String {
 		return C.get_name();
 	}
 
-	static function get_instrument_name(instrument:Int):String {
+	static function getInstrumentName(instrument:Int):String {
 		return C.get_instrument(instrument);
 	}
 
-	static function calculate_song_duration():Int {
+	static function calculateSongDuration():Int {
 		return C.calculate_song_duration();
 	}
 
-	static function set_position(pos:Int):Void {
+	static function setPosition(pos:Int):Void {
 		C.set_position(pos);
 	}
 
@@ -111,23 +111,23 @@ class IbxmCpp {
 		return C.seek(samplePosition);
 	}
 
-	static function calculate_mix_buffer_len(sample_rate:Int):Int {
-		return C.calculate_mix_buf_len(sample_rate);
+	static function calculateMixBufferLen(sampleRate:Int):Int {
+		return C.calculate_mix_buf_len(sampleRate);
 	}
 
-	static function set_muted(channel:Int, muted:Bool):Void {
+	static function setMuted(channel:Int, muted:Bool):Void {
 		C.set_muted(channel, muted);
 	}
 
-	static function is_muted(channel:Int):Bool {
+	static function isMuted(channel:Int):Bool {
 		return C.is_muted(channel);
 	}
 
-	static function get_num_patterns():Int {
+	static function getNumPatterns():Int {
 		return C.get_num_patterns();
 	}
 
-	static function get_sequence():Array<Int> {
+	static function getSequence():Array<Int> {
 		var len = C.get_sequence_length();
 		var buf = haxe.io.Bytes.alloc(len * 4);
 		C.get_sequence(cpp.NativeArray.address(buf.getData(), 0));
@@ -136,43 +136,43 @@ class IbxmCpp {
 
 	static inline final STRUCT_BUFFER_SIZE = 56;
 
-	static function get_instrument(index:Int):ibxm.Instrument {
+	static function getInstrument(index:Int):ibxm.Instrument {
 		var buf = haxe.io.Bytes.alloc(STRUCT_BUFFER_SIZE);
 		C.get_instrument_data(index, cpp.NativeArray.address(buf.getData(), 0));
 		return ibxm.Instrument.fromBytes(buf);
 	}
 
-	static function get_sample(instrument:Int, sample:Int):ibxm.Sample {
+	static function getSample(instrument:Int, sample:Int):ibxm.Sample {
 		var buf = haxe.io.Bytes.alloc(STRUCT_BUFFER_SIZE);
 		C.get_sample_data(instrument, sample, cpp.NativeArray.address(buf.getData(), 0));
 		return ibxm.Sample.fromBytes(buf);
 	}
 
-	static function get_num_channels():Int {
+	static function getNumChannels():Int {
 		return C.get_num_channels();
 	}
 
-	static function get_num_instruments():Int {
+	static function getNumInstruments():Int {
 		return C.get_num_instruments();
 	}
 
-	static function get_sequence_length():Int {
+	static function getSequenceLength():Int {
 		return C.get_sequence_length();
 	}
 
-	static function get_sequence_pos():Int {
+	static function getSequencePos():Int {
 		return C.get_sequence_pos();
 	}
 
-	static function get_row():Int {
+	static function getRow():Int {
 		return C.get_row();
 	}
 
-	static function get_pattern_num_rows(seqPos:Int):Int {
+	static function getPatternNumRows(seqPos:Int):Int {
 		return C.get_pattern_num_rows(seqPos);
 	}
 
-	static function get_pattern_data(seqPos:Int):haxe.io.Bytes {
+	static function getPatternData(seqPos:Int):haxe.io.Bytes {
 		var numRows = C.get_pattern_num_rows(seqPos);
 		var numChannels = C.get_num_channels();
 		var buf = haxe.io.Bytes.alloc(numChannels * numRows * 5);
@@ -180,7 +180,7 @@ class IbxmCpp {
 		return buf;
 	}
 
-	static function get_source():IReplaySource {
+	static function getSource():IReplaySource {
 		return new IbxmSource();
 	}
 }
@@ -192,12 +192,12 @@ class IbxmSource implements IReplaySource {
 
 	function new() {}
 
-	function calculateSongDuration():Int {
-		return IbxmCpp.calculate_song_duration();
+	function calculateSequenceLength():Int {
+		return IbxmCpp.calculateSongDuration();
 	}
 
-	function calculateMixBufferLen(sampleRate:Int):Int {
-		return IbxmCpp.calculate_mix_buffer_len(sampleRate);
+	function calculateMixBufferLength(sampleRate:Int):Int {
+		return IbxmCpp.calculateMixBufferLen(sampleRate);
 	}
 
 	function getAudio(left:haxe.io.Float32Array, right:haxe.io.Float32Array, numSamples:Int):Void {

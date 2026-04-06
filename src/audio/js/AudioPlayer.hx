@@ -5,7 +5,6 @@ import haxe.io.Bytes;
 import haxe.io.Float32Array;
 import audio.IReplaySource;
 import audio.IAudioPlayer;
-
 import audio.js.AudioWorkletContext;
 import js.html.Blob;
 import js.html.URL;
@@ -13,17 +12,17 @@ import ibxm.bindings.js.IbxmJs as Replay;
 
 @:publicFields
 class AudioPlayer implements IAudioPlayer {
-	var replay:IReplaySource;
-	
-	var audioContext:AudioWorkletContext;
-	var node:AudioWorkletNode;
+	private var replay:IReplaySource;
+	private var audioContext:AudioWorkletContext;
+	private var node:AudioWorkletNode;
 
-	var bufferSize:Int = 1024;
-	var totalSamples:Int = 0;
-	var samplesProcessed:Int = 0;
-	var isInitialized:Bool = false;
+	private var bufferSize:Int = 1024;
+	private var totalSamples:Int = 0;
+	private var isInitialized:Bool = false;
+	private var moduleReady:js.lib.Promise<Void>;
+	
 	var isPlaying:Bool = false;
-	var moduleReady:js.lib.Promise<Void>;
+	var samplesProcessed:Int = 0;
 
 	function new():Void {
 		audioContext = new AudioWorkletContext();
@@ -75,8 +74,7 @@ class AudioPlayer implements IAudioPlayer {
 		var buffR = new Float32Array(bufferSize);
 		replay.getAudio(buffL, buffR, bufferSize);
 		streamAudioData(buffL, buffR);
-		if(samplesProcessed >= totalSamples)
-		{
+		if (samplesProcessed >= totalSamples) {
 			samplesProcessed = 0;
 		}
 	}
@@ -93,7 +91,7 @@ class AudioPlayer implements IAudioPlayer {
 			rightBuffer: buffR,
 		});
 	}
-	
+
 	function getSamplingRate():Float {
 		return audioContext.sampleRate;
 	}
@@ -117,6 +115,14 @@ class AudioPlayer implements IAudioPlayer {
 		node.port.postMessage({type: 'start'});
 		trace('Audio playback started');
 	}
+
+	function playModule(moduleBytes:Bytes):Void {
+		var intArray = new Int8Array(moduleBytes.getData());
+		Replay.initialise(intArray, Std.int(getSamplingRate()));
+		setAudioSource(Replay.getSource());
+		moduleReady.then(_ -> play());
+	}
+
 
 	/* stop playback completely, clears all buffers */
 	function stop():Void {
@@ -155,16 +161,9 @@ class AudioPlayer implements IAudioPlayer {
 		trace('Audio playback resumed');
 	}
 
-	function playModule(moduleBytes:Bytes):Void {
-		var intArray = new Int8Array(moduleBytes.getData());
-		Replay.initialise(intArray, Std.int(getSamplingRate()));
-		setAudioSource(Replay.get_source()); // IbxmJs binding, snake_case intentional
-		moduleReady.then(_ -> play());
-	}
-
 	function setAudioSource(replay:IReplaySource):Void {
 		this.replay = replay;
-		totalSamples = replay.calculateSongDuration();
+		totalSamples = replay.calculateSequenceLength();
 		isInitialized = true;
 	}
 

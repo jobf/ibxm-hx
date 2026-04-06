@@ -57,7 +57,7 @@ import haxe.io.Float32Array;
 	function getSequencePos():Int;
 	function calculateSongDuration():Int;
 	function calculateTickLen(tempo:Int, sampleRate:Int):Int;
-	function setPosition(pattern:Int):Int;
+	function setPosition(pattern:Int):Void;
 	function seek(samplePos:Int):Int;
 	function isMuted(channel:Int):Bool;
 	function setMuted(channel:Int, mute:Bool):Void;
@@ -78,76 +78,78 @@ class IbxmJs {
 	// 2 x oversample * 2 channels
 	static inline final MIX_BUFFER_STRIDE = 4;
 
-	static function initialise(data:js.lib.Int8Array, sampling_rate:Int) {
+	static function initialise(data:js.lib.Int8Array, samplingRate:Int, interpolation:Bool = true):Int {
 		module = new Module(data);
-		ibxm = new Ibxm(module, sampling_rate);
+		ibxm = new Ibxm(module, samplingRate);
+		ibxm.setInterpolation(interpolation);
+		return 0;
 	}
 
-	static function get_instrument_name(instrument:Int):String {
+	static function getInstrumentName(instrument:Int):String {
 		return module.instruments[instrument]?.name ?? "";
 	}
 
-	static function calculate_song_duration():Int {
+	static function calculateSongDuration():Int {
 		return ibxm.calculateSongDuration();
 	}
 
-	static function calculate_mix_buffer_len(sample_rate:Int):Int {
+	static function calculateMixBufferLen(sampleRate:Int):Int {
 		// this returns the largest potentially needed buffersize, it's a bit crude but it not going to cause problems
 		return (ibxm.calculateTickLen(MIN_TEMPO, MAX_SAMPLE_RATE) + RESAMPLE_PADDING) * MIX_BUFFER_STRIDE;
 	}
 
-	static function get_version():String {
+	static function getVersion():String {
 		return ibxm.getVersion();
 	}
 
-	static function set_position(pattern:Int) {
+	static function setPosition(pattern:Int) {
 		ibxm.setPosition(pattern);
 	}
 
-	static function seek(samplePosition:Int) {
-		ibxm.seek(samplePosition);
+	static function seek(samplePosition:Int):Int {
+		return ibxm.seek(samplePosition);
 	}
 
-	static function get_name():String {
+	static function getName():String {
 		return module.songName;
 	}
 
-	static function get_num_channels():Int {
+	static function getNumChannels():Int {
 		return module.numChannels;
 	}
 
-	static function get_num_instruments():Int {
+	static function getNumInstruments():Int {
 		return module.instruments.length - 1;
 	}
 
-	static function get_sequence_length():Int {
+	static function getSequenceLength():Int {
 		return module.sequenceLength;
 	}
 
-	static function get_num_patterns():Int {
+	static function getNumPatterns():Int {
 		return module.numPatterns;
 	}
 
-	static function get_sequence():Array<Int> {
+	static function getSequence():Array<Int> {
 		return [for (i in 0...module.sequenceLength) module.sequence[i]];
 	}
 
-	static function get_sequence_pos():Int {
+	static function getSequencePos():Int {
 		return ibxm.getSequencePos();
 	}
 
-	static function get_row():Int {
+	static function getRow():Int {
 		return ibxm.getRow();
 	}
 
-	static function get_pattern_num_rows(seqPos:Int):Int {
+	static function getPatternNumRows(seqPos:Int):Int {
 		var pat = module.sequence[seqPos];
 		return module.patterns[pat].numRows;
 	}
 
-	static function get_pattern_data(seqPos:Int):haxe.io.Bytes {
-		var numChannels = get_num_channels();
-		var numRows = get_pattern_num_rows(seqPos);
+	static function getPatternData(seqPos:Int):haxe.io.Bytes {
+		var numChannels = getNumChannels();
+		var numRows = getPatternNumRows(seqPos);
 		var pat = module.sequence[seqPos];
 		var buf = haxe.io.Bytes.alloc(numChannels * numRows * 5);
 		var pattern = module.patterns[pat];
@@ -166,26 +168,25 @@ class IbxmJs {
 		return buf;
 	}
 
-	static function get_instrument(index:Int):ibxm.Instrument {
+	static function getInstrument(index:Int):ibxm.Instrument {
 		var ins = module.instruments[index];
 		return new ibxm.Instrument(ins.name, ins.numSamples, ins.volumeFadeOut, ins.vibratoType, ins.vibratoSweep, ins.vibratoDepth, ins.vibratoRate);
 	}
 
-	static function get_sample(instrument:Int, sample:Int):ibxm.Sample {
+	static function getSample(instrument:Int, sample:Int):ibxm.Sample {
 		var s = module.instruments[instrument].samples[sample];
-		return new ibxm.Sample(s.name, s.loopStart, s.loopLength, s.volume, s.panning, // JS already uses -1 for unset, 0-255 for value
-			s.relNote, s.fineTune);
+		return new ibxm.Sample(s.name, s.loopStart, s.loopLength, s.volume, s.panning, s.relNote, s.fineTune);
 	}
 
-	static function set_muted(channel:Int, muted:Bool):Void {
+	static function setMuted(channel:Int, muted:Bool):Void {
 		ibxm.setMuted(channel, muted);
 	}
 
-	static function is_muted(channel:Int):Bool {
+	static function isMuted(channel:Int):Bool {
 		return ibxm.isMuted(channel);
 	}
 
-	static function get_source():IReplaySource {
+	static function getSource():IReplaySource {
 		return new IbxmSource(ibxm);
 	}
 }
@@ -194,16 +195,20 @@ class IbxmJs {
 class IbxmSource implements IReplaySource {
 	var replay:Ibxm;
 
+	static var CHUNK = 2048;
+	static var leftBuf = new Float32Array(CHUNK);
+	static var rightBuf = new Float32Array(CHUNK);
+
 	function new(replay:Ibxm) {
 		this.replay = replay;
 	}
 
-	function calculateSongDuration():Int {
+	function calculateSequenceLength():Int {
 		return replay.calculateSongDuration();
 	}
 
-	function calculateMixBufferLen(sampleRate:Int):Int {
-		return IbxmJs.calculate_mix_buffer_len(sampleRate);
+	function calculateMixBufferLength(sampleRate:Int):Int {
+		return IbxmJs.calculateMixBufferLen(sampleRate);
 	}
 
 	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, numSamples:Int):Void {
@@ -211,12 +216,17 @@ class IbxmSource implements IReplaySource {
 	}
 
 	function getAudioInterleaved(output:Float32Array, numSamples:Int):Void {
-		var left = new Float32Array(numSamples);
-		var right = new Float32Array(numSamples);
-		replay.getAudio(left, right, numSamples);
-		for (i in 0...numSamples) {
-			output[i * 2]     = left[i];
-			output[i * 2 + 1] = right[i];
+		var offset = 0;
+		while (offset < numSamples) {
+			var chunk = numSamples - offset;
+			if (chunk > CHUNK)
+				chunk = CHUNK;
+			replay.getAudio(leftBuf, rightBuf, chunk);
+			for (i in 0...chunk) {
+				output[(offset + i) * 2] = leftBuf[i];
+				output[(offset + i) * 2 + 1] = rightBuf[i];
+			}
+			offset += chunk;
 		}
 	}
 }

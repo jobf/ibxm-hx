@@ -12,24 +12,24 @@ import ibxm.Replay;
 
 @:publicFields
 class AudioPlayer implements IAudioPlayer {
-	var replay:IReplaySource;
-	var buffers:Array<ALBuffer>;
-	var source:ALSource;
-	var timer:haxe.Timer;
-	var buffersProcessed:Int = 0;
+	private var replay:IReplaySource;
+	private var buffers:Array<ALBuffer>;
+	private var source:ALSource;
+	private var timer:haxe.Timer;
+	
+	private var buffersProcessed:Int = 0;
+	private var sampleRate:Int;
+	private var numChannels = 2;
+	private var bufferSize:Int;
+	private var bufferCount:Int;
+	private var totalSamples:Int = 0;
+	private var isInitialized:Bool = false;
+	private var interleavedBuf:Float32Array;
 
-	var sampleRate:Int;
-	var numChannels = 2;
-
-	var bufferSize:Int;
-	var bufferCount:Int;
-	var totalSamples:Int = 0;
-	var samplesProcessed:Int = 0;
-	var isInitialized:Bool = false;
 	var isPlaying:Bool = false;
-	var interleavedBuf:Float32Array;
+	var samplesProcessed:Int = 0;
 
-	public function new(sampleRate:Int = 48000) {
+	function new(sampleRate:Int = 48000) {
 		this.sampleRate = sampleRate;
 	}
 
@@ -65,12 +65,12 @@ class AudioPlayer implements IAudioPlayer {
 		}
 
 		timer.run = () -> {
-			var num_buffers_finished:Int = AL.getSourcei(source, AL.BUFFERS_PROCESSED);
-			buffersProcessed += num_buffers_finished;
+			var numBuffersFinished:Int = AL.getSourcei(source, AL.BUFFERS_PROCESSED);
+			buffersProcessed += numBuffersFinished;
 
-			if (num_buffers_finished > 0) {
-				var finished_buffers = AL.sourceUnqueueBuffers(source, num_buffers_finished);
-				for (buffer in finished_buffers) {
+			if (numBuffersFinished > 0) {
+				var finishedBuffers = AL.sourceUnqueueBuffers(source, numBuffersFinished);
+				for (buffer in finishedBuffers) {
 					if (isInitialized) {
 						replay.getAudioInterleaved(interleavedBuf, bufferSampleCount);
 					}
@@ -82,46 +82,46 @@ class AudioPlayer implements IAudioPlayer {
 		}
 	}
 
-	public function getSamplingRate():Float {
+	function getSamplingRate():Float {
 		return sampleRate;
 	}
 
-	public function getSamplesProcessed():Int {
+	function getSamplesProcessed():Int {
 		return samplesProcessed;
 	}
 
-	public function setAudioSource(replay:IReplaySource) {
+	function setAudioSource(replay:IReplaySource):Void {
 		this.replay = replay;
-		totalSamples = replay.calculateSongDuration();
+		totalSamples = replay.calculateSequenceLength();
 		init();
 		isInitialized = true;
 	}
 
-	public function play() {
+	function play():Void {
 		AL.sourcePlay(source);
 		isPlaying = true;
 	}
 
-	public function playModule(moduleBytes:Bytes) {
+	function playModule(moduleBytes:Bytes):Void {
 		Replay.initialise(moduleBytes, sampleRate);
 		setAudioSource(Replay.getSource());
 		AL.sourcePlay(source);
 		isPlaying = true;
 	}
 
-	public function stop() {
+	function stop():Void {
 		AL.sourceStop(source);
 		samplesProcessed = 0;
 		isPlaying = false;
 	}
 
-	public function pause() {
+	function pause():Void {
 		if (!isPlaying) return;
 		isPlaying = false;
 		AL.sourcePause(source);
 	}
 
-	public function resume() {
+	function resume():Void {
 		if(isPlaying) return;
 		AL.sourcePlay(source);
 		isPlaying = true;
