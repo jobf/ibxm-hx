@@ -61,7 +61,7 @@ import haxe.io.Float32Array;
 	function seek(samplePos:Int):Int;
 	function isMuted(channel:Int):Bool;
 	function setMuted(channel:Int, mute:Bool):Void;
-	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, count:Int):Void;
+	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, numSamples:Int):Void;
 }
 
 @:publicFields
@@ -206,7 +206,17 @@ class IbxmSource implements IReplaySource {
 		return IbxmJs.calculate_mix_buffer_len(sampleRate);
 	}
 
-	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, count:Int):Void {
-		replay.getAudio(leftBuf, rightBuf, count);
+	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, numSamples:Int):Void {
+		replay.getAudio(leftBuf, rightBuf, numSamples);
+	}
+
+	function getAudioInterleaved(output:Float32Array, numSamples:Int):Void {
+		var left = new Float32Array(numSamples);
+		var right = new Float32Array(numSamples);
+		replay.getAudio(left, right, numSamples);
+		for (i in 0...numSamples) {
+			output[i * 2]     = left[i];
+			output[i * 2 + 1] = right[i];
+		}
 	}
 }

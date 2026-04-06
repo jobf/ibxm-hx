@@ -133,14 +133,16 @@ lime test windows
 lime test hlc
 ```
 
+## test app with ui
+
+See https://github.com/jobf/ibxm-hx-test
+
 
 # to do
 
-- unit tests ?
-- float32 for ibxm-ac
+- test on windows
+- make locateIbxmHaxelibPath more resilient (add additional check for haxelib version?)
 - comment pure tests
 - document build macro
-- test on windows
-- republish full player app in a separate repo
-- make locateIbxmHaxelibPath more resilient (add additional check for haxelib version?)
 - clean out unused code
+- unit tests ?

@@ -86,16 +86,8 @@ DEFINE_PRIM(_I32, calculate_song_duration, _NO_ARG);
 
 // get_audio
 
-HL_PRIM int HL_NAME(get_audio)(vbyte *output_buffer, int len) {
-  /* Get audio from replay.*/
-  short *soutput_buffer = (short *)output_buffer;
-  audio_callback(replay, soutput_buffer, len);
-
-  // if (count > 0) {
-  //   // micromod_get_audio(soutput_buffer, count);
-  //   // crossfeed(soutput_buffer, count);
-  //   // samples_remaining -= count;
-  // }
+HL_PRIM void HL_NAME(get_audio)(vbyte *output_buffer, int len) {
+  audio_callback(replay, (short *)output_buffer, len);
 }
 
 DEFINE_PRIM(_VOID, get_audio, _BYTES _I32);

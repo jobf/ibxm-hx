@@ -88,7 +88,7 @@ class IbxmCpp {
 
 	static function initialise(module:haxe.io.Bytes, sampleRate:Int):Int {
 		var ptr = cpp.NativeArray.address(module.getData(), 0);
-		return C.initialise(ptr, module.length, sampleRate, 0);
+		return C.initialise(ptr, module.length, sampleRate, 1);
 	}
 
 	static function get_name():String {
@@ -101,11 +101,6 @@ class IbxmCpp {
 
 	static function calculate_song_duration():Int {
 		return C.calculate_song_duration();
-	}
-
-	static function get_audio(output_buffer:haxe.io.Bytes, len:Int):Void {
-		var ptr = cpp.NativeArray.address(output_buffer.getData(), 0);
-		C.get_audio(ptr, len);
 	}
 
 	static function set_position(pos:Int):Void {
@@ -186,17 +181,16 @@ class IbxmCpp {
 	}
 
 	static function get_source():IReplaySource {
-		return new IbxmSource((interleaved, count) -> get_audio(interleaved, count));
+		return new IbxmSource();
 	}
 }
 
 @:publicFields
 class IbxmSource implements IReplaySource {
-	var get_audio:(interleaved:Bytes, count:Int) -> Void;
+	static inline final CHUNK = 2048;
+	final chunkBuf = haxe.io.Bytes.alloc(CHUNK * 4);
 
-	function new(audioCallback:(interleaved:Bytes, count:Int) -> Void) {
-		this.get_audio = audioCallback;
-	}
+	function new() {}
 
 	function calculateSongDuration():Int {
 		return IbxmCpp.calculate_song_duration();
@@ -206,7 +200,35 @@ class IbxmSource implements IReplaySource {
 		return IbxmCpp.calculate_mix_buffer_len(sampleRate);
 	}
 
-	function getAudio(interleavedBuf:Bytes, count:Int):Void {
-		get_audio(interleavedBuf, count);
+	function getAudio(left:haxe.io.Float32Array, right:haxe.io.Float32Array, numSamples:Int):Void {
+		var offset = 0;
+		while (offset < numSamples) {
+			var chunk = numSamples - offset;
+			if (chunk > CHUNK) chunk = CHUNK;
+			C.get_audio(cpp.NativeArray.address(chunkBuf.getData(), 0), chunk * 4);
+			for (i in 0...chunk) {
+				var l = chunkBuf.getUInt16(i * 4);
+				left[offset + i] = (l < 32768 ? l : l - 65536) * (1.0 / 32768.0);
+				var r = chunkBuf.getUInt16(i * 4 + 2);
+				right[offset + i] = (r < 32768 ? r : r - 65536) * (1.0 / 32768.0);
+			}
+			offset += chunk;
+		}
+	}
+
+	function getAudioInterleaved(output:haxe.io.Float32Array, numSamples:Int):Void {
+		var offset = 0;
+		while (offset < numSamples) {
+			var chunk = numSamples - offset;
+			if (chunk > CHUNK) chunk = CHUNK;
+			C.get_audio(cpp.NativeArray.address(chunkBuf.getData(), 0), chunk * 4);
+			for (i in 0...chunk) {
+				var l = chunkBuf.getUInt16(i * 4);
+				output[(offset + i) * 2]     = (l < 32768 ? l : l - 65536) * (1.0 / 32768.0);
+				var r = chunkBuf.getUInt16(i * 4 + 2);
+				output[(offset + i) * 2 + 1] = (r < 32768 ? r : r - 65536) * (1.0 / 32768.0);
+			}
+			offset += chunk;
+		}
 	}
 }
