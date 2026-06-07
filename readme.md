@@ -33,6 +33,9 @@ Minimal example of generating the audio and writing it to disk as a wav file.
 # format (read and write various file formats including wav)
 haxelib install format
 
+# audio drivers
+haxelib git juice https://github.com/jobf/juice
+
 # ibxm-hx (this haxelib)
 haxelib git ibxm-hx https://github.com/jobf/ibxm-hx
 
@@ -102,6 +105,9 @@ haxelib install lime
 # peote-view (open gl render lib)
 haxelib install peote-view
 
+# audio drivers
+haxelib git juice https://github.com/jobf/juice
+
 # ibxm-hx (this haxelib)
 haxelib git ibxm-hx https://github.com/jobf/ibxm-hx
 ```
@@ -148,4 +154,3 @@ See https://github.com/jobf/ibxm-hx-test
 - unit tests ?
 - expose control over looping
 - port reverb to haxe
-- extract web audio streaming api so it can be used in other places

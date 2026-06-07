@@ -1,9 +1,9 @@
 package ibxm;
 
 import haxe.io.Bytes;
-import audio.IAudioDriver;
-import audio.IAudioSource;
-import audio.source.ibxm.AudioSource;
+import juice.IAudioDriver;
+import juice.IAudioSource;
+import juice.source.ibxm.AudioSource;
 import ibxm.Pattern;
 import ibxm.Instrument;
 import ibxm.Sample;

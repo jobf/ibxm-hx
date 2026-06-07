@@ -1,6 +1,6 @@
 import sys.io.File;
 import ibxm.Replay;
-import audio.driver.format.AudioDriver;
+import juice.driver.format.AudioDriver;
 
 var SAMPLE_RATE = 48000;
 var OUTPUT = "output.wav";

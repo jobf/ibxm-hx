@@ -1,5 +1,6 @@
 --class-path src
 -lib ibxm-hx
 -lib format
+-lib juice
 -main Main
 -cpp bin/cpp

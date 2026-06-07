@@ -12,6 +12,7 @@
 
 	<haxelib name="lime" />	
 	<haxelib name="peote-view" />
+	<haxelib name="juice" />
 	<haxelib name="ibxm-hx" />
 
 	<haxeflag name="-dce" value="full" />

@@ -3,7 +3,7 @@ import js.html.InputElement;
 import js.html.ButtonElement;
 
 import ibxm.Replay;
-import audio.driver.format.AudioDriver;
+import juice.driver.format.AudioDriver;
 
 var sampleRate = 48000;
 
