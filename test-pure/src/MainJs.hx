@@ -1,7 +1,9 @@
-import ibxm.Replay;
 import js.Browser;
 import js.html.InputElement;
 import js.html.ButtonElement;
+
+import ibxm.Replay;
+import audio.driver.format.AudioDriver;
 
 var sampleRate = 48000;
 
@@ -24,7 +26,7 @@ function main() {
 				return;
 			}
 
-			var author = new AuthorWav(sampleRate, Replay.getSongDuration());
+			var author = new AudioDriver(sampleRate, Replay.getSongDuration());
 			author.setAudioSource(Replay.getSource());
 			author.play();
 		};

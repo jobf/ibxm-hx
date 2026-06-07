@@ -2,20 +2,21 @@ package ibxm;
 
 import haxe.io.Bytes;
 import audio.IAudioDriver;
+import audio.IAudioSource;
+import audio.source.ibxm.AudioSource;
 import ibxm.Pattern;
 import ibxm.Instrument;
 import ibxm.Sample;
 
 #if hl
-import ibxm.bindings.hl.IbxmHl as Ibxm;
-#end
-
-#if cpp
-import ibxm.bindings.cpp.IbxmCpp as Ibxm;
-#end
-
-#if js
-import ibxm.bindings.js.IbxmJs as Ibxm;
+import ibxm.bindings.hl.IbxmHl.IbxmHl as Ibxm;
+import ibxm.bindings.hl.IbxmHl.IbxmSource;
+#elseif cpp
+import ibxm.bindings.cpp.IbxmCpp.IbxmCpp as Ibxm;
+import ibxm.bindings.cpp.IbxmCpp.IbxmSource;
+#else
+import ibxm.bindings.js.IbxmJs.IbxmJs as Ibxm;
+import ibxm.bindings.js.IbxmJs.IbxmSource;
 #end
 
 
@@ -107,8 +108,8 @@ class Replay {
 	}
 
 	/** Returns an IAudioSource wrapping the current replayer, for use with AudioDriver. **/
-	static function getSource() {
-		return Ibxm.getSource();
+	static function getSource():IAudioSource {
+		return new AudioSource(Ibxm.getSource());
 	}
 
 	/** Returns the number of channels in the loaded module. **/

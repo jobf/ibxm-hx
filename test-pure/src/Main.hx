@@ -1,5 +1,6 @@
-import ibxm.Replay;
 import sys.io.File;
+import ibxm.Replay;
+import audio.driver.format.AudioDriver;
 
 var SAMPLE_RATE = 48000;
 var OUTPUT = "output.wav";
@@ -19,7 +20,7 @@ function main() {
 
 	trace('${Replay.getName()} — ${Replay.getNumChannels()} channels');
 
-	var author = new AuthorWav(SAMPLE_RATE, OUTPUT, Replay.getSongDuration());
+	var author = new AudioDriver(SAMPLE_RATE, OUTPUT, Replay.getSongDuration());
 	author.setAudioSource(Replay.getSource());
 	author.play();
 

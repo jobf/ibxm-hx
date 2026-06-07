@@ -1,4 +1,4 @@
-package audio.lime;
+package audio.driver.lime;
 
 import lime.utils.ArrayBufferView;
 import lime.utils.ArrayBuffer;
@@ -6,10 +6,8 @@ import lime.media.openal.AL;
 import lime.media.openal.ALBuffer;
 import lime.media.openal.ALSource;
 import haxe.io.Float32Array;
-import haxe.io.Bytes;
 import haxe.Timer;
 import audio.IAudioSource;
-import ibxm.Replay;
 
 @:publicFields
 class AudioDriver implements IAudioDriver {
@@ -101,12 +99,6 @@ class AudioDriver implements IAudioDriver {
 		isPlaying = true;
 	}
 
-	function playModule(moduleBytes:Bytes):Void {
-		Replay.initialise(moduleBytes, sampleRate);
-		setAudioSource(Replay.getSource());
-		AL.sourcePlay(source);
-		isPlaying = true;
-	}
 
 	function stop():Void {
 		AL.sourceStop(source);

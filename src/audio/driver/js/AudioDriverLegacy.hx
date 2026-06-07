@@ -1,12 +1,9 @@
-package audio.js;
+package audio.driver.js;
 
 import js.html.audio.AudioContext;
 import js.html.audio.AudioProcessingEvent;
 import js.html.audio.ScriptProcessorNode;
-import js.lib.Int8Array;
-import haxe.io.Bytes;
 import audio.IAudioSource;
-import ibxm.bindings.js.IbxmJs as Replay;
 
 /*
 	This IAudioDriver implementation can be used when https is not available.
@@ -57,13 +54,6 @@ class AudioDriverLegacy implements IAudioDriver {
 		samplesProcessed = 0;
 		scriptProcessor.onaudioprocess = onaudioprocess;
 		scriptProcessor.connect(audioContext.destination);
-	}
-
-	function playModule(moduleBytes:Bytes):Void {
-		var intArray = new Int8Array(moduleBytes.getData());
-		Replay.initialise(intArray, Std.int(getSamplingRate()));
-		setAudioSource(Replay.getSource());
-		play();
 	}
 
 	function stop():Void {

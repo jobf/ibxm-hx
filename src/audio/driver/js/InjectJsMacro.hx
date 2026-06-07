@@ -1,4 +1,4 @@
-package audio.js;
+package audio.driver.js;
 
 #if macro
 import sys.io.File;

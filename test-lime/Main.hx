@@ -1,24 +1,21 @@
 import lime.app.Application;
 import peote.view.Load;
+import ibxm.Replay;
 
 class Main extends Application {
 	override function onWindowCreate() {
-		#if html5
+		#if js
 		
 		// web browser cannot start audio until a gesture has been made so bind to mouse event
 		var isPlaying:Bool = false;
-		var isAudioWorklet = true;
 		window.onMouseDown.add((x, y, button) -> {
 			if (!isPlaying) {
-				
-				if(isAudioWorklet){
-					// use AudioWorklet for streaming audio data, requires https when not running locally
-					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioDriver().playModule(data));
-				}
-				else{
-					// use AudioProcessingEvent for streaming audio data, does not require https at all
-					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioDriverLegacy().playModule(data));
-				}
+				Load.bytes("assets/yesod.xm", data -> {
+					var driver = audio.driver.js.AudioDriver.create();
+					Replay.initialise(new js.lib.Int8Array(data.getData()), Std.int(driver.getSamplingRate()));
+					driver.setAudioSource(Replay.getSource());
+					driver.play();
+				});
 
 				isPlaying = true;
 			}
@@ -34,7 +31,12 @@ class Main extends Application {
 
 		#else
 		
-		Load.bytes("assets/yesod.xm", data -> new audio.lime.AudioDriver().playModule(data));
+		Load.bytes("assets/yesod.xm", data -> {
+			var driver = new audio.driver.lime.AudioDriver();
+			Replay.initialise(data, Std.int(driver.getSamplingRate()));
+			driver.setAudioSource(Replay.getSource());
+			driver.play();
+		});
 		
 		#end
 	}

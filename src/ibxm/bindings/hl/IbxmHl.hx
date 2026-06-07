@@ -1,7 +1,6 @@
 package ibxm.bindings.hl;
 
 import haxe.io.Bytes;
-import audio.IAudioSource;
 
 @:hlNative("ibxmHl") extern class C {
 	static function get_version():hl.Bytes;
@@ -154,13 +153,13 @@ class IbxmHl {
 		return buf;
 	}
 
-	static function getSource():IAudioSource {
+	static function getSource():IbxmSource {
 		return new IbxmSource();
 	}
 }
 
 @:publicFields
-class IbxmSource implements IAudioSource {
+class IbxmSource {
 	static inline final CHUNK = 2048;
 	final chunkBuf = haxe.io.Bytes.alloc(CHUNK * 4);
 

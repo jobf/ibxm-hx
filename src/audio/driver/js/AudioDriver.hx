@@ -1,17 +1,30 @@
-package audio.js;
+package audio.driver.js;
 
-import js.lib.Int8Array;
-import haxe.io.Bytes;
 import haxe.io.Float32Array;
 import audio.IAudioSource;
 import audio.IAudioDriver;
-import audio.js.AudioWorkletContext;
+import audio.driver.js.AudioWorkletContext;
 import js.html.Blob;
 import js.html.URL;
-import ibxm.bindings.js.IbxmJs as Replay;
 
 @:publicFields
 class AudioDriver implements IAudioDriver {
+	/** Creates the best available driver: AudioWorklet where supported, falling back to the legacy ScriptProcessor driver otherwise. **/
+	static function create():IAudioDriver {
+		
+		if(!isWorkletSupported()){
+			// use AudioProcessingEvent for streaming audio data, does not require https at all
+			return new AudioDriverLegacy();
+		}
+		
+		// use AudioWorklet for streaming audio data, requires https when not running locally
+		return new AudioDriver();
+	}
+
+	private static function isWorkletSupported():Bool {
+		return Reflect.hasField(js.Browser.window, "AudioWorkletNode");
+	}
+
 	private var audioSource:IAudioSource;
 	private var audioContext:AudioWorkletContext;
 	private var node:AudioWorkletNode;
@@ -19,7 +32,8 @@ class AudioDriver implements IAudioDriver {
 	private var bufferSize:Int = 1024;
 	private var isInitialized:Bool = false;
 	private var moduleReady:js.lib.Promise<Void>;
-	
+	private var blobUrl:String;
+
 	var isPlaying:Bool = false;
 	var samplesProcessed:Int = 0;
 
@@ -27,8 +41,8 @@ class AudioDriver implements IAudioDriver {
 		audioContext = new AudioWorkletContext();
 
 		var blob = new Blob([Processor.code], {type: "application/javascript"});
-		var url = URL.createObjectURL(blob);
-		moduleReady = audioContext.audioWorklet.addModule(url);
+		blobUrl = URL.createObjectURL(blob);
+		moduleReady = audioContext.audioWorklet.addModule(blobUrl);
 	}
 
 	function initAudioWorkletNode() {
@@ -44,8 +58,8 @@ class AudioDriver implements IAudioDriver {
 			// channelInterpretation: channelInterpretation
 		});
 
-		// practice good blob url hygiene ??
-		// URL.revokeObjectURL(url);
+		// practice good blob blobUrl hygiene ??
+		URL.revokeObjectURL(blobUrl);
 
 		// listen for messages from the processor (to tell us it's hungry)
 		node.port.onmessage = event -> {
@@ -93,31 +107,25 @@ class AudioDriver implements IAudioDriver {
 
 	/* begin playback, starts requesting audio data */
 	function play():Void {
-		if (node == null) {
-			initAudioWorkletNode();
-		}
+		moduleReady.then(_ -> {
+			if (node == null) {
+				initAudioWorkletNode();
+			}
 
-		if (!isInitialized) {
-			trace('AudioWorklet not initialized');
-			return;
-		}
+			if (!isInitialized) {
+				trace('AudioWorklet not initialized');
+				return;
+			}
 
-		if (audioContext.state == SUSPENDED) {
-			audioContext.resume();
-		}
+			if (audioContext.state == SUSPENDED) {
+				audioContext.resume();
+			}
 
-		isPlaying = true;
-		node.port.postMessage({type: 'start'});
-		trace('Audio playback started');
+			isPlaying = true;
+			node.port.postMessage({type: 'start'});
+			trace('Audio playback started');
+		});
 	}
-
-	function playModule(moduleBytes:Bytes):Void {
-		var intArray = new Int8Array(moduleBytes.getData());
-		Replay.initialise(intArray, Std.int(getSamplingRate()));
-		setAudioSource(Replay.getSource());
-		moduleReady.then(_ -> play());
-	}
-
 
 	/* stop playback completely, clears all buffers */
 	function stop():Void {

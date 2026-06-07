@@ -1,6 +1,5 @@
 package ibxm.bindings.js;
 
-import audio.IAudioSource;
 import haxe.io.Float32Array;
 
 @:native("IBXMModule") extern class Module {
@@ -188,13 +187,13 @@ class IbxmJs {
 		return ibxm.isMuted(channel);
 	}
 
-	static function getSource():IAudioSource {
+	static function getSource():IbxmSource {
 		return new IbxmSource(ibxm);
 	}
 }
 
 @:publicFields
-class IbxmSource implements IAudioSource {
+class IbxmSource {
 	var replay:Ibxm;
 
 	static var CHUNK = 2048;

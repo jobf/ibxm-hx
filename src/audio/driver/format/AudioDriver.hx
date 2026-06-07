@@ -1,3 +1,5 @@
+package audio.driver.format;
+
 import audio.IAudioDriver;
 import audio.IAudioSource;
 import haxe.io.Float32Array;
@@ -5,7 +7,7 @@ import haxe.io.BytesOutput;
 import format.wav.Data;
 import format.wav.Writer;
 
-class AuthorWav implements IAudioDriver {
+class AudioDriver implements IAudioDriver {
 	public var isPlaying:Bool = false;
 	public var samplesProcessed:Int = 0;
 

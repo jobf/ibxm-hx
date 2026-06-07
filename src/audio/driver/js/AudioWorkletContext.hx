@@ -1,4 +1,4 @@
-package audio.js;
+package audio.driver.js;
 
 import js.html.audio.AudioContext;
 import js.html.audio.AudioContextOptions;

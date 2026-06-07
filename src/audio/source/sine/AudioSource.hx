@@ -1,4 +1,4 @@
-package audio.source;
+package audio.source.sine;
 
 import haxe.io.Float32Array;
 import audio.IAudioSource;
@@ -6,7 +6,7 @@ import audio.IAudioSource;
 /**
  * For testing with generated sine wave.
  */
-class SineSource implements IAudioSource {
+class AudioSource implements IAudioSource {
 	var sampleRate:Float;
 	var leftFreq:Float = 440;
 	var rightFreq:Float = 220;

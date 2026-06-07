@@ -1,7 +1,7 @@
 package ibxm.bindings.cpp;
 
+#if cpp
 import haxe.io.Bytes;
-import audio.IAudioSource;
 
 @:buildXml('
 <files id="haxe">
@@ -180,13 +180,13 @@ class IbxmCpp {
 		return buf;
 	}
 
-	static function getSource():IAudioSource {
+	static function getSource():IbxmSource {
 		return new IbxmSource();
 	}
 }
 
 @:publicFields
-class IbxmSource implements IAudioSource {
+class IbxmSource {
 	static inline final CHUNK = 2048;
 	final chunkBuf = haxe.io.Bytes.alloc(CHUNK * 4);
 
@@ -224,3 +224,4 @@ class IbxmSource implements IAudioSource {
 		}
 	}
 }
+#end
