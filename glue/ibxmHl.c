@@ -45,7 +45,10 @@ HL_PRIM int HL_NAME(initialise)(vbyte *file_data, int file_length,
 	if (!module) return -1;
 	replay = new_replay(module, sample_rate, interpolation);
 	loop = 1;
-	if (replay) return 0;
+	if (replay) {
+		samples_remaining = replay_calculate_duration(replay);
+		return 0;
+	}
 	return -1;
 }
 
@@ -66,14 +69,13 @@ HL_PRIM vbyte *HL_NAME(get_instrument)(int instrument) {
 
 DEFINE_PRIM(_BYTES, get_instrument, _I32);
 
-// calculate_song_duration
+// get_song_duration
 
-HL_PRIM int HL_NAME(calculate_song_duration)(_NO_ARG) {
-	samples_remaining = replay_calculate_duration(replay);
+HL_PRIM int HL_NAME(get_song_duration)(_NO_ARG) {
 	return samples_remaining;
 }
 
-DEFINE_PRIM(_I32, calculate_song_duration, _NO_ARG);
+DEFINE_PRIM(_I32, get_song_duration, _NO_ARG);
 
 // get_audio
 

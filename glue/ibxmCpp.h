@@ -4,7 +4,7 @@ const char* ibxm_cpp_get_version();
 int ibxm_cpp_initialise(unsigned char *file_data, int file_length, int sample_rate, int interpolation);
 const char* ibxm_cpp_get_name();
 const char* ibxm_cpp_get_instrument(int instrument);
-int ibxm_cpp_calculate_song_duration();
+int ibxm_cpp_get_song_duration();
 void ibxm_cpp_get_audio(unsigned char *output_buffer, int len);
 void ibxm_cpp_set_position(int pos);
 int ibxm_cpp_seek(int sample_pos);

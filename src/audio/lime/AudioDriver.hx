@@ -8,11 +8,12 @@ import lime.media.openal.ALSource;
 import haxe.io.Float32Array;
 import haxe.io.Bytes;
 import haxe.Timer;
+import audio.IAudioSource;
 import ibxm.Replay;
 
 @:publicFields
-class AudioPlayer implements IAudioPlayer {
-	private var replay:IReplaySource;
+class AudioDriver implements IAudioDriver {
+	private var audioSource:IAudioSource;
 	private var buffers:Array<ALBuffer>;
 	private var source:ALSource;
 	private var timer:haxe.Timer;
@@ -22,7 +23,6 @@ class AudioPlayer implements IAudioPlayer {
 	private var numChannels = 2;
 	private var bufferSize:Int;
 	private var bufferCount:Int;
-	private var totalSamples:Int = 0;
 	private var isInitialized:Bool = false;
 	private var interleavedBuf:Float32Array;
 
@@ -72,7 +72,7 @@ class AudioPlayer implements IAudioPlayer {
 				var finishedBuffers = AL.sourceUnqueueBuffers(source, numBuffersFinished);
 				for (buffer in finishedBuffers) {
 					if (isInitialized) {
-						replay.getAudioInterleaved(interleavedBuf, bufferSampleCount);
+						audioSource.getAudioInterleaved(interleavedBuf, bufferSampleCount);
 					}
 					AL.bufferData(buffer, AL_FORMAT_STEREO_FLOAT32, interleavedView, bufferSize, sampleRate);
 					AL.sourceQueueBuffer(source, buffer);
@@ -90,9 +90,8 @@ class AudioPlayer implements IAudioPlayer {
 		return samplesProcessed;
 	}
 
-	function setAudioSource(replay:IReplaySource):Void {
-		this.replay = replay;
-		totalSamples = replay.calculateSequenceLength();
+	function setAudioSource(audioSource:IAudioSource):Void {
+		this.audioSource = audioSource;
 		init();
 		isInitialized = true;
 	}

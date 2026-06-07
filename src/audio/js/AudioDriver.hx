@@ -3,21 +3,20 @@ package audio.js;
 import js.lib.Int8Array;
 import haxe.io.Bytes;
 import haxe.io.Float32Array;
-import audio.IReplaySource;
-import audio.IAudioPlayer;
+import audio.IAudioSource;
+import audio.IAudioDriver;
 import audio.js.AudioWorkletContext;
 import js.html.Blob;
 import js.html.URL;
 import ibxm.bindings.js.IbxmJs as Replay;
 
 @:publicFields
-class AudioPlayer implements IAudioPlayer {
-	private var replay:IReplaySource;
+class AudioDriver implements IAudioDriver {
+	private var audioSource:IAudioSource;
 	private var audioContext:AudioWorkletContext;
 	private var node:AudioWorkletNode;
 
 	private var bufferSize:Int = 1024;
-	private var totalSamples:Int = 0;
 	private var isInitialized:Bool = false;
 	private var moduleReady:js.lib.Promise<Void>;
 	
@@ -69,14 +68,10 @@ class AudioPlayer implements IAudioPlayer {
 	}
 
 	function generateAndSendBuffer() {
-		samplesProcessed += bufferSize;
 		var buffL = new Float32Array(bufferSize);
 		var buffR = new Float32Array(bufferSize);
-		replay.getAudio(buffL, buffR, bufferSize);
+		audioSource.getAudio(buffL, buffR, bufferSize);
 		streamAudioData(buffL, buffR);
-		if (samplesProcessed >= totalSamples) {
-			samplesProcessed = 0;
-		}
 	}
 
 	function streamAudioData(buffL:Float32Array, buffR:Float32Array) {
@@ -161,9 +156,8 @@ class AudioPlayer implements IAudioPlayer {
 		trace('Audio playback resumed');
 	}
 
-	function setAudioSource(replay:IReplaySource):Void {
-		this.replay = replay;
-		totalSamples = replay.calculateSequenceLength();
+	function setAudioSource(audioSource:IAudioSource):Void {
+		this.audioSource = audioSource;
 		isInitialized = true;
 	}
 

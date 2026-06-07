@@ -1,7 +1,7 @@
 package ibxm;
 
 import haxe.io.Bytes;
-import audio.IAudioPlayer;
+import audio.IAudioDriver;
 import ibxm.Pattern;
 import ibxm.Instrument;
 import ibxm.Sample;
@@ -81,9 +81,9 @@ class Replay {
 		return Ibxm.getInstrumentName(instrument);
 	}
 
-	/** Returns the total sequence length in samples. **/
-	static function calculateSequenceLength():Int {
-		return Ibxm.calculateSongDuration();
+	/** Returns the total song duration in samples at the initialised sample rate. **/
+	static function getSongDuration():Int {
+		return Ibxm.getSongDuration();
 	}
 
 	/** Returns the ibxm library version string. **/
@@ -106,7 +106,7 @@ class Replay {
 		return Ibxm.getName();
 	}
 
-	/** Returns an IReplaySource wrapping the current replayer, for use with AudioPlayer. **/
+	/** Returns an IAudioSource wrapping the current replayer, for use with AudioDriver. **/
 	static function getSource() {
 		return Ibxm.getSource();
 	}

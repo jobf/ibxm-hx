@@ -5,17 +5,17 @@ import js.html.audio.AudioProcessingEvent;
 import js.html.audio.ScriptProcessorNode;
 import js.lib.Int8Array;
 import haxe.io.Bytes;
-import audio.IReplaySource;
+import audio.IAudioSource;
 import ibxm.bindings.js.IbxmJs as Replay;
 
 /*
-	This IAudioPlayer implementation can be used when https is not available.
+	This IAudioDriver implementation can be used when https is not available.
 */
 @:publicFields
-class AudioPlayerLegacy implements IAudioPlayer {
+class AudioDriverLegacy implements IAudioDriver {
 	private var audioContext:AudioContext;
 	private var scriptProcessor:ScriptProcessorNode;
-	private var replay:IReplaySource;
+	private var audioSource:IAudioSource;
 	private var onaudioprocess:AudioProcessingEvent->Void;
 	
 	private var bufferSize:Int = 0;
@@ -29,13 +29,13 @@ class AudioPlayerLegacy implements IAudioPlayer {
 		trace('info: using legacy web player');
 	}
 
-	function setAudioSource(replay:IReplaySource) {
+	function setAudioSource(audioSource:IAudioSource) {
 		onaudioprocess = (event:AudioProcessingEvent) -> {
 			if (isPlaying) {
 				samplesProcessed += event.outputBuffer.length;
 				var leftBuf:haxe.io.Float32Array = cast event.outputBuffer.getChannelData(0);
 				var rightBuf:haxe.io.Float32Array = cast event.outputBuffer.getChannelData(1);
-				replay.getAudio(leftBuf, rightBuf, event.outputBuffer.length);
+				audioSource.getAudio(leftBuf, rightBuf, event.outputBuffer.length);
 			} else {
 				// Fill with silence when stopped
 				var leftBuf:haxe.io.Float32Array = cast event.outputBuffer.getChannelData(0);

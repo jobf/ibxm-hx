@@ -1,32 +1,35 @@
-import audio.IAudioPlayer;
-import audio.IReplaySource;
+import audio.IAudioDriver;
+import audio.IAudioSource;
 import haxe.io.Float32Array;
 import haxe.io.BytesOutput;
 import format.wav.Data;
 import format.wav.Writer;
 
-class AuthorWav implements IAudioPlayer {
+class AuthorWav implements IAudioDriver {
 	public var isPlaying:Bool = false;
 	public var samplesProcessed:Int = 0;
 
 	final sampleRate:Int;
+	final totalSamples:Int;
 
 	#if sys
 	final outputPath:String;
 
-	public function new(sampleRate:Int, outputPath:String) {
+	public function new(sampleRate:Int, outputPath:String, totalSamples:Int) {
 		this.sampleRate = sampleRate;
 		this.outputPath = outputPath;
+		this.totalSamples = totalSamples;
 	}
 	#else
-	public function new(sampleRate:Int) {
+	public function new(sampleRate:Int, totalSamples:Int) {
 		this.sampleRate = sampleRate;
+		this.totalSamples = totalSamples;
 	}
 	#end
 
-	var source:IReplaySource;
+	var source:IAudioSource;
 
-	public function setAudioSource(s:IReplaySource):Void
+	public function setAudioSource(s:IAudioSource):Void
 		source = s;
 
 	public function getSamplingRate():Float
@@ -44,8 +47,6 @@ class AuthorWav implements IAudioPlayer {
 	public function play():Void {
 		isPlaying = true;
 		samplesProcessed = 0;
-
-		var totalSamples = source.calculateSequenceLength();
 
 		final channels = 2;
 		final bytesPerFrame = channels * 4;

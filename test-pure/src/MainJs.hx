@@ -24,7 +24,7 @@ function main() {
 				return;
 			}
 
-			var author = new AuthorWav(sampleRate);
+			var author = new AuthorWav(sampleRate, Replay.getSongDuration());
 			author.setAudioSource(Replay.getSource());
 			author.play();
 		};

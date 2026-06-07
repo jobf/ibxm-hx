@@ -1,18 +1,12 @@
-package audio;
+package audio.source;
 
 import haxe.io.Float32Array;
-
-interface IReplaySource {
-	function calculateSequenceLength():Int;
-	function calculateMixBufferLength(sampleRate:Int):Int;
-	function getAudio(left:Float32Array, right:Float32Array, numSamples:Int):Void;
-	function getAudioInterleaved(output:Float32Array, numSamples:Int):Void;
-}
+import audio.IAudioSource;
 
 /**
  * For testing with generated sine wave.
  */
-class SineSource implements IReplaySource {
+class SineSource implements IAudioSource {
 	var sampleRate:Float;
 	var leftFreq:Float = 440;
 	var rightFreq:Float = 220;
@@ -23,14 +17,6 @@ class SineSource implements IReplaySource {
 
 	public function new(samplingRate:Float) {
 		sampleRate = samplingRate;
-	}
-
-	public function calculateSequenceLength():Int {
-		return Std.int(sampleRate * 5);
-	}
-
-	public function calculateMixBufferLength(sr:Int):Int {
-		return 4096;
 	}
 
 	var PI2 = 2.0 * Math.PI;
@@ -58,7 +44,7 @@ class SineSource implements IReplaySource {
 		var rightPhaseIncrement = (2 * Math.PI * rightFreq) / this.sampleRate;
 
 		for (i in 0...numSamples) {
-			output[i * 2]     = Math.sin(this.leftPhase) * amplitude;
+			output[i * 2] = Math.sin(this.leftPhase) * amplitude;
 			output[i * 2 + 1] = Math.sin(this.rightPhase) * amplitude;
 
 			this.leftPhase += leftPhaseIncrement;

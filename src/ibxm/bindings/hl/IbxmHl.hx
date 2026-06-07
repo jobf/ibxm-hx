@@ -1,7 +1,7 @@
 package ibxm.bindings.hl;
 
 import haxe.io.Bytes;
-import audio.IReplaySource;
+import audio.IAudioSource;
 
 @:hlNative("ibxmHl") extern class C {
 	static function get_version():hl.Bytes;
@@ -10,7 +10,7 @@ import audio.IReplaySource;
 
 	static function get_instrument(instrument:Int):hl.Bytes;
 
-	static function calculate_song_duration():Int;
+	static function get_song_duration():Int;
 
 	static function get_audio(output_buffer:hl.Bytes, len:Int):Void;
 
@@ -67,8 +67,8 @@ class IbxmHl {
 		return String.fromUTF8(string);
 	}
 
-	static function calculateSongDuration():Int {
-		return C.calculate_song_duration();
+	static function getSongDuration():Int {
+		return C.get_song_duration();
 	}
 
 	static function setPosition(pattern:Int) {
@@ -154,25 +154,17 @@ class IbxmHl {
 		return buf;
 	}
 
-	static function getSource():IReplaySource {
+	static function getSource():IAudioSource {
 		return new IbxmSource();
 	}
 }
 
 @:publicFields
-class IbxmSource implements IReplaySource {
+class IbxmSource implements IAudioSource {
 	static inline final CHUNK = 2048;
 	final chunkBuf = haxe.io.Bytes.alloc(CHUNK * 4);
 
 	function new() {}
-
-	function calculateSequenceLength():Int {
-		return IbxmHl.calculateSongDuration();
-	}
-
-	function calculateMixBufferLength(sampleRate:Int):Int {
-		return IbxmHl.calculateMixBufferLen(sampleRate);
-	}
 
 	function getAudio(left:haxe.io.Float32Array, right:haxe.io.Float32Array, numSamples:Int):Void {
 		var offset = 0;

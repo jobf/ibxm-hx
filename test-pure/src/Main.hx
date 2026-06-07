@@ -19,7 +19,7 @@ function main() {
 
 	trace('${Replay.getName()} — ${Replay.getNumChannels()} channels');
 
-	var author = new AuthorWav(SAMPLE_RATE, OUTPUT);
+	var author = new AuthorWav(SAMPLE_RATE, OUTPUT, Replay.getSongDuration());
 	author.setAudioSource(Replay.getSource());
 	author.play();
 

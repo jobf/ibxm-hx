@@ -13,11 +13,11 @@ class Main extends Application {
 				
 				if(isAudioWorklet){
 					// use AudioWorklet for streaming audio data, requires https when not running locally
-					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioPlayer().playModule(data));
+					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioDriver().playModule(data));
 				}
 				else{
 					// use AudioProcessingEvent for streaming audio data, does not require https at all
-					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioPlayerLegacy().playModule(data));
+					Load.bytes("assets/yesod.xm", data -> new audio.js.AudioDriverLegacy().playModule(data));
 				}
 
 				isPlaying = true;
@@ -34,7 +34,7 @@ class Main extends Application {
 
 		#else
 		
-		Load.bytes("assets/yesod.xm", data -> new audio.lime.AudioPlayer().playModule(data));
+		Load.bytes("assets/yesod.xm", data -> new audio.lime.AudioDriver().playModule(data));
 		
 		#end
 	}

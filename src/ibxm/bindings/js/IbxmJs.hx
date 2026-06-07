@@ -1,6 +1,6 @@
 package ibxm.bindings.js;
 
-import audio.IReplaySource;
+import audio.IAudioSource;
 import haxe.io.Float32Array;
 
 @:native("IBXMModule") extern class Module {
@@ -68,6 +68,7 @@ import haxe.io.Float32Array;
 class IbxmJs {
 	private static var ibxm:Ibxm;
 	private static var module:Module;
+	private static var songDuration:Int;
 
 	// the minimum tempo a module can be
 	static inline final MIN_TEMPO = 32;
@@ -82,6 +83,7 @@ class IbxmJs {
 		module = new Module(data);
 		ibxm = new Ibxm(module, samplingRate);
 		ibxm.setInterpolation(interpolation);
+		songDuration = ibxm.calculateSongDuration();
 		return 0;
 	}
 
@@ -89,8 +91,8 @@ class IbxmJs {
 		return module.instruments[instrument]?.name ?? "";
 	}
 
-	static function calculateSongDuration():Int {
-		return ibxm.calculateSongDuration();
+	static function getSongDuration():Int {
+		return songDuration;
 	}
 
 	static function calculateMixBufferLen(sampleRate:Int):Int {
@@ -186,13 +188,13 @@ class IbxmJs {
 		return ibxm.isMuted(channel);
 	}
 
-	static function getSource():IReplaySource {
+	static function getSource():IAudioSource {
 		return new IbxmSource(ibxm);
 	}
 }
 
 @:publicFields
-class IbxmSource implements IReplaySource {
+class IbxmSource implements IAudioSource {
 	var replay:Ibxm;
 
 	static var CHUNK = 2048;
@@ -201,14 +203,6 @@ class IbxmSource implements IReplaySource {
 
 	function new(replay:Ibxm) {
 		this.replay = replay;
-	}
-
-	function calculateSequenceLength():Int {
-		return replay.calculateSongDuration();
-	}
-
-	function calculateMixBufferLength(sampleRate:Int):Int {
-		return IbxmJs.calculateMixBufferLen(sampleRate);
 	}
 
 	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, numSamples:Int):Void {

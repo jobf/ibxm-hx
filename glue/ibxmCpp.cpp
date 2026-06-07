@@ -19,7 +19,10 @@ int ibxm_cpp_initialise(unsigned char *file_data, int file_length, int sample_ra
 	if (!ibxm_module) return -1;
 	ibxm_replay = new_replay(ibxm_module, sample_rate, interpolation);
 	loop = 1;
-	if (ibxm_replay) return 0;
+	if (ibxm_replay) {
+		samples_remaining = replay_calculate_duration(ibxm_replay);
+		return 0;
+	}
 	return -1;
 }
 
@@ -34,9 +37,7 @@ const char* ibxm_cpp_get_instrument(int instrument) {
 	return ibxm_module->instruments[instrument].name;
 }
 
-int ibxm_cpp_calculate_song_duration() {
-	if (!ibxm_replay) return 0;
-	samples_remaining = replay_calculate_duration(ibxm_replay);
+int ibxm_cpp_get_song_duration() {
 	return samples_remaining;
 }
 
