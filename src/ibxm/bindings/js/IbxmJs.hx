@@ -65,7 +65,7 @@ import haxe.io.Float32Array;
 
 @:publicFields
 class IbxmJs {
-	private static var ibxm:Ibxm;
+	static var ibxm:Ibxm;
 	private static var module:Module;
 	private static var songDuration:Int;
 
@@ -78,11 +78,20 @@ class IbxmJs {
 	// 2 x oversample * 2 channels
 	static inline final MIX_BUFFER_STRIDE = 4;
 
-	static function initialise(data:js.lib.Int8Array, samplingRate:Int, interpolation:Bool = true):Int {
+	static function loadModule(data:js.lib.Int8Array):Int {
+		trace('load module');
 		module = new Module(data);
+		return 0;
+	}
+
+	static function init(samplingRate:Int, interpolation:Bool = true):Int {
+		if(module == null) return 1;
+		
 		ibxm = new Ibxm(module, samplingRate);
 		ibxm.setInterpolation(interpolation);
 		songDuration = ibxm.calculateSongDuration();
+		
+		trace('init ibxm');
 		return 0;
 	}
 
@@ -188,33 +197,31 @@ class IbxmJs {
 	}
 
 	static function getSource():IbxmSource {
-		return new IbxmSource(ibxm);
+		return new IbxmSource();
 	}
 }
 
 @:publicFields
 class IbxmSource {
-	var replay:Ibxm;
-
 	static var CHUNK = 2048;
 	static var leftBuf = new Float32Array(CHUNK);
 	static var rightBuf = new Float32Array(CHUNK);
 
-	function new(replay:Ibxm) {
-		this.replay = replay;
-	}
+	function new() {}
 
 	function getAudio(leftBuf:Float32Array, rightBuf:Float32Array, numSamples:Int):Void {
-		replay.getAudio(leftBuf, rightBuf, numSamples);
+		if(IbxmJs.ibxm == null) trace('!! NO REPLAY');
+		IbxmJs.ibxm?.getAudio(leftBuf, rightBuf, numSamples);
 	}
 
 	function getAudioInterleaved(output:Float32Array, numSamples:Int):Void {
+		if(IbxmJs.ibxm == null) trace('!! NO REPLAY');
 		var offset = 0;
 		while (offset < numSamples) {
 			var chunk = numSamples - offset;
 			if (chunk > CHUNK)
 				chunk = CHUNK;
-			replay.getAudio(leftBuf, rightBuf, chunk);
+			IbxmJs.ibxm?.getAudio(leftBuf, rightBuf, chunk);
 			for (i in 0...chunk) {
 				output[(offset + i) * 2] = leftBuf[i];
 				output[(offset + i) * 2 + 1] = rightBuf[i];

@@ -16,8 +16,11 @@ private extern class C {
 	@:native("ibxm_cpp_get_version")
 	static function get_version():cpp.ConstCharStar;
 
-	@:native("ibxm_cpp_initialise")
-	static function initialise(data:cpp.Pointer<cpp.UInt8>, file_length:Int, sample_rate:Int, interpolation:Int):Int;
+	@:native("ibxm_cpp_load_module")
+	static function load_module(data:cpp.Pointer<cpp.UInt8>, file_length:Int):Int;
+
+	@:native("ibxm_cpp_init")
+	static function init(sample_rate:Int, interpolation:Int):Int;
 
 	@:native("ibxm_cpp_get_name")
 	static function get_name():cpp.ConstCharStar;
@@ -86,9 +89,13 @@ class IbxmCpp {
 		return C.get_version();
 	}
 
-	static function initialise(module:haxe.io.Bytes, sampleRate:Int, interpolation:Bool):Int {
+	static function loadModule(module:haxe.io.Bytes):Int {
 		var ptr = cpp.NativeArray.address(module.getData(), 0);
-		return C.initialise(ptr, module.length, sampleRate, interpolation ? 1 : 0);
+		return C.load_module(ptr, module.length);
+	}
+
+	static function init(sampleRate:Int, interpolation:Bool):Int {
+		return C.init(sampleRate, interpolation ? 1 : 0);
 	}
 
 	static function getName():String {

@@ -33,16 +33,24 @@ HL_PRIM int HL_NAME(calculate_mix_buf_len)(int sample_rate) {
 
 DEFINE_PRIM(_I32, calculate_mix_buf_len, _I32);
 
-// initialise
+// load_module
 
-HL_PRIM int HL_NAME(initialise)(vbyte *file_data, int file_length,
-																int sample_rate, int interpolation) {
-
+HL_PRIM int HL_NAME(load_module)(vbyte *file_data, int file_length) {
 	char *cfile_data = (char *)file_data;
 	data.buffer = cfile_data;
 	data.length = file_length;
 	module = module_load(&data, message);
-	if (!module) return -1;
+	return module ? 0 : -1;
+}
+
+DEFINE_PRIM(_I32, load_module, _BYTES _I32);
+
+// init
+
+HL_PRIM int HL_NAME(init)(int sample_rate, int interpolation) {
+	if (!module) {
+		return -1;
+	}
 	replay = new_replay(module, sample_rate, interpolation);
 	loop = 1;
 	if (replay) {
@@ -52,7 +60,7 @@ HL_PRIM int HL_NAME(initialise)(vbyte *file_data, int file_length,
 	return -1;
 }
 
-DEFINE_PRIM(_I32, initialise, _BYTES _I32 _I32 _I32);
+DEFINE_PRIM(_I32, init, _I32 _I32);
 
 // get_instrument
 

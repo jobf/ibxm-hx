@@ -20,14 +20,15 @@ function main() {
 			var ab:js.lib.ArrayBuffer = cast reader.result;
 			var int8 = new js.lib.Int8Array(ab);
 
-			var err = Replay.initialise(int8, sampleRate);
-			if (err != "") {
-				Browser.alert('Error: $err');
+			var error = Replay.loadModule(int8);
+			if (error == "") error = Replay.init(sampleRate);
+			if (error != "") {
+				Browser.alert('Error: $error');
 				return;
 			}
 
-			var author = new AudioDriver(sampleRate, Replay.getSongDuration());
-			author.setAudioSource(Replay.getSource());
+			var author = new AudioDriver(Replay.getSongDuration());
+			author.setSampleSource(Replay.getSource());
 			author.play();
 		};
 		reader.readAsArrayBuffer(file);

@@ -5,7 +5,9 @@ import haxe.io.Bytes;
 @:hlNative("ibxmHl") extern class C {
 	static function get_version():hl.Bytes;
 
-	static function initialise(data:hl.Bytes, file_length:Int, sample_rate:Int, interpolation:Int):Int;
+	static function load_module(data:hl.Bytes, file_length:Int):Int;
+	
+	static function init(sample_rate:Int, interpolation:Int):Int;
 
 	static function get_instrument(instrument:Int):hl.Bytes;
 
@@ -56,8 +58,12 @@ class IbxmHl {
 		return String.fromUTF8(string);
 	}
 
-	static function initialise(module:haxe.io.Bytes, sampleRate:Int, interpolation:Bool):Int {
-		return C.initialise(module, module.length, sampleRate, interpolation ? 1 : 0);
+	static function loadModule(module:haxe.io.Bytes):Int {
+		return C.load_module(module, module.length);
+	}
+
+	static function init(sampleRate:Int, interpolation:Bool):Int {
+		return C.init(sampleRate, interpolation ? 1 : 0);
 	}
 
 	static function getInstrumentName(instrument:Int):String {

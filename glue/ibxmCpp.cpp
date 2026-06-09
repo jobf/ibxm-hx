@@ -12,10 +12,14 @@ const char* ibxm_cpp_get_version() {
 	return IBXM_VERSION;
 }
 
-int ibxm_cpp_initialise(unsigned char *file_data, int file_length, int sample_rate, int interpolation) {
+int ibxm_cpp_load_module(unsigned char *file_data, int file_length) {
 	ibxm_data.buffer = (char *)file_data;
 	ibxm_data.length = file_length;
 	ibxm_module = module_load(&ibxm_data, ibxm_message);
+	return ibxm_module ? 0 : -1;
+}
+
+int ibxm_cpp_init(int sample_rate, int interpolation) {
 	if (!ibxm_module) return -1;
 	ibxm_replay = new_replay(ibxm_module, sample_rate, interpolation);
 	loop = 1;

@@ -1,13 +1,11 @@
 package ibxm;
 
 import haxe.io.Bytes;
-import juice.IAudioDriver;
-import juice.IAudioSource;
-import juice.source.ibxm.AudioSource;
+import juice.AudioDriverContract;
 import ibxm.Pattern;
 import ibxm.Instrument;
 import ibxm.Sample;
-
+import juice.SampleSource;
 #if hl
 import ibxm.bindings.hl.IbxmHl.IbxmHl as Ibxm;
 import ibxm.bindings.hl.IbxmHl.IbxmSource;
@@ -19,13 +17,11 @@ import ibxm.bindings.js.IbxmJs.IbxmJs as Ibxm;
 import ibxm.bindings.js.IbxmJs.IbxmSource;
 #end
 
-
 #if js
 typedef ModuleFormat = js.lib.Int8Array;
 #else
 typedef ModuleFormat = haxe.io.Bytes;
 #end
-
 
 /** Static facade over the platform-specific ibxm bindings.
 	All playback, query, and module inspection functions are accessed through here. **/
@@ -52,29 +48,37 @@ class Replay {
 	}
 	#end
 
-	/** Initialises the replayer with the given module data and sample rate.
+	/** Parses the module data. Call `init` afterwards to complete initialisation.
 		Returns an empty string on success, or an error message on failure. **/
-	static function initialise(moduleData:ModuleFormat, sampleRate:Int, interpolation:Bool = true):String {
-		if (sampleRate <= 0) {
-			return 'Invalid sample rate $sampleRate. Cannot continue.';
-		}
-
-		var errorMessage = "";
-
+	static function loadModule(moduleData:ModuleFormat):String {
+		var error = "";
 		try {
-			var result = Ibxm.initialise(moduleData, sampleRate, interpolation);
+			var result = Ibxm.loadModule(moduleData);
 			if (result != 0) {
-				isInitialised = false;
-				errorMessage = 'Module initialisation failed.';
-			} else {
-				isInitialised = true;
+				error = 'Module load failed.';
 			}
-		} catch (e) {
-			isInitialised = false;
-			errorMessage = e.message;
+		} 
+		catch (e) {
+			error = e.message;
 		}
+		return error;
+	}
 
-		return errorMessage;
+	/** Creates the replay engine at the given sample rate. Requires `loadModule` to have succeeded.
+		Returns an empty string on success, or an error message on failure. **/
+	static function init(sampleRate:Int, interpolation:Bool = true):String {
+		var error = "";
+		try {
+			var result = Ibxm.init(sampleRate, interpolation);
+			if (result != 0) {
+				error = 'Replay creation failed.';
+			}
+			isInitialised = true;
+		}
+		catch (e) {
+			error = e.message;
+		}
+		return error;
 	}
 
 	/** Returns the name string for the given instrument index. **/
@@ -107,9 +111,9 @@ class Replay {
 		return Ibxm.getName();
 	}
 
-	/** Returns an IAudioSource wrapping the current replayer, for use with AudioDriver. **/
-	static function getSource():IAudioSource {
-		return new AudioSource(Ibxm.getSource());
+	/** Returns an ISampleSource wrapping the current replayer, for use with AudioDriver. **/
+	static function getSource():ISampleSource {
+		return new SampleSource(Ibxm.getSource());
 	}
 
 	/** Returns the number of channels in the loaded module. **/

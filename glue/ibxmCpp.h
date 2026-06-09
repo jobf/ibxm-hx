@@ -1,7 +1,8 @@
 #pragma once
 
 const char* ibxm_cpp_get_version();
-int ibxm_cpp_initialise(unsigned char *file_data, int file_length, int sample_rate, int interpolation);
+int ibxm_cpp_load_module(unsigned char *file_data, int file_length);
+int ibxm_cpp_init(int sample_rate, int interpolation);
 const char* ibxm_cpp_get_name();
 const char* ibxm_cpp_get_instrument(int instrument);
 int ibxm_cpp_get_song_duration();

@@ -11,9 +11,10 @@ class Main extends Application {
 		window.onMouseDown.add((x, y, button) -> {
 			if (!isPlaying) {
 				Load.bytes("assets/yesod.xm", data -> {
+					Replay.loadModule(new js.lib.Int8Array(data.getData()));
+
 					var driver = juice.driver.js.AudioDriver.create();
-					Replay.initialise(new js.lib.Int8Array(data.getData()), Std.int(driver.getSamplingRate()));
-					driver.setAudioSource(Replay.getSource());
+					driver.setSampleSource(Replay.getSource());
 					driver.play();
 				});
 
@@ -32,9 +33,10 @@ class Main extends Application {
 		#else
 		
 		Load.bytes("assets/yesod.xm", data -> {
+			Replay.loadModule(data);
+
 			var driver = new juice.driver.lime.AudioDriver();
-			Replay.initialise(data, Std.int(driver.getSamplingRate()));
-			driver.setAudioSource(Replay.getSource());
+			driver.setSampleSource(Replay.getSource());
 			driver.play();
 		});
 		

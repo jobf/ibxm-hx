@@ -12,16 +12,17 @@ function main() {
 		return;
 	}
 	var data = File.getBytes(args[0]);
-	var err = Replay.initialise(data, SAMPLE_RATE);
-	if (err != "") {
-		trace('Error: $err');
+	var error = Replay.loadModule(data);
+	if (error == "") error = Replay.init(SAMPLE_RATE);
+	if (error != "") {
+		trace('Error: $error');
 		return;
 	}
 
 	trace('${Replay.getName()} — ${Replay.getNumChannels()} channels');
 
-	var author = new AudioDriver(SAMPLE_RATE, OUTPUT, Replay.getSongDuration());
-	author.setAudioSource(Replay.getSource());
+	var author = new AudioDriver(Replay.getSongDuration(), OUTPUT);
+	author.setSampleSource(Replay.getSource());
 	author.play();
 
 	trace('Written $OUTPUT (${Std.int(author.samplesProcessed / SAMPLE_RATE)}s)');
