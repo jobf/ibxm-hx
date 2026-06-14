@@ -1,11 +1,11 @@
 package ibxm;
 
 import haxe.io.Bytes;
-import juice.AudioDriverContract;
+import juice.API;
 import ibxm.Pattern;
 import ibxm.Instrument;
 import ibxm.Sample;
-import juice.SampleSource;
+import juice.IbxmStream;
 #if hl
 import ibxm.bindings.hl.IbxmHl.IbxmHl as Ibxm;
 import ibxm.bindings.hl.IbxmHl.IbxmSource;
@@ -57,8 +57,7 @@ class Replay {
 			if (result != 0) {
 				error = 'Module load failed.';
 			}
-		} 
-		catch (e) {
+		} catch (e) {
 			error = e.message;
 		}
 		return error;
@@ -74,8 +73,7 @@ class Replay {
 				error = 'Replay creation failed.';
 			}
 			isInitialised = true;
-		}
-		catch (e) {
+		} catch (e) {
 			error = e.message;
 		}
 		return error;
@@ -111,9 +109,9 @@ class Replay {
 		return Ibxm.getName();
 	}
 
-	/** Returns an ISampleSource wrapping the current replayer, for use with AudioDriver. **/
-	static function getSource():ISampleSource {
-		return new SampleSource(Ibxm.getSource());
+	/** Returns an ISampleStream wrapping the current replayer, for use with AudioDriver. **/
+	static function getStream():ISampleStream {
+		return new IbxmStream(Ibxm.getStream());
 	}
 
 	/** Returns the number of channels in the loaded module. **/

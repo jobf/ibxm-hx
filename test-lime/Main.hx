@@ -14,7 +14,7 @@ class Main extends Application {
 					Replay.loadModule(new js.lib.Int8Array(data.getData()));
 
 					var driver = juice.driver.js.AudioDriver.create();
-					driver.setSampleSource(Replay.getSource());
+					driver.setSampleStream(Replay.getStream());
 					driver.play();
 				});
 
@@ -36,7 +36,7 @@ class Main extends Application {
 			Replay.loadModule(data);
 
 			var driver = new juice.driver.lime.AudioDriver();
-			driver.setSampleSource(Replay.getSource());
+			driver.setSampleStream(Replay.getStream());
 			driver.play();
 		});
 		

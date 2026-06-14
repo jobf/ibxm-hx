@@ -196,7 +196,7 @@ class IbxmJs {
 		return ibxm.isMuted(channel);
 	}
 
-	static function getSource():IbxmSource {
+	static function getStream():IbxmSource {
 		return new IbxmSource();
 	}
 }

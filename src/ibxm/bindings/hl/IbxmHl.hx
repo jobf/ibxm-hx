@@ -159,7 +159,7 @@ class IbxmHl {
 		return buf;
 	}
 
-	static function getSource():IbxmSource {
+	static function getStream():IbxmSource {
 		return new IbxmSource();
 	}
 }

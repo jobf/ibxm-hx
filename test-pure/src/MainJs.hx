@@ -28,7 +28,7 @@ function main() {
 			}
 
 			var author = new AudioDriver(Replay.getSongDuration());
-			author.setSampleSource(Replay.getSource());
+			author.setSampleStream(Replay.getStream());
 			author.play();
 		};
 		reader.readAsArrayBuffer(file);

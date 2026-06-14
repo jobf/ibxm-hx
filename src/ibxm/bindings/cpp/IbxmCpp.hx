@@ -187,7 +187,7 @@ class IbxmCpp {
 		return buf;
 	}
 
-	static function getSource():IbxmSource {
+	static function getStream():IbxmSource {
 		return new IbxmSource();
 	}
 }

@@ -1,7 +1,7 @@
 package juice;
 
 import haxe.io.Float32Array;
-import juice.AudioDriverContract;
+import juice.API;
 
 #if hl
 import ibxm.bindings.hl.IbxmHl.IbxmSource;
@@ -13,7 +13,7 @@ import ibxm.bindings.js.IbxmJs.IbxmSource;
 
 import ibxm.Replay;
 
-class SampleSource implements ISampleSource {
+class IbxmStream implements ISampleStream {
 	final ibxm:IbxmSource;
 
 	public function new(ibxm:IbxmSource) {

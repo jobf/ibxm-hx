@@ -22,7 +22,7 @@ function main() {
 	trace('${Replay.getName()} — ${Replay.getNumChannels()} channels');
 
 	var author = new AudioDriver(Replay.getSongDuration(), OUTPUT);
-	author.setSampleSource(Replay.getSource());
+	author.setSampleStream(Replay.getStream());
 	author.play();
 
 	trace('Written $OUTPUT (${Std.int(author.samplesProcessed / SAMPLE_RATE)}s)');
